@@ -2,7 +2,7 @@
   <head>
     <meta charset="UTF-8" />
 
-    <title>Will Moving to this Country Make You Live Longer?</title>
+    <title>Speed Dating</title>
 
     <style>
       body {
@@ -15,7 +15,7 @@
       }
 
       h2 {
-        font-size: 16pt;
+        font-size: 16;
         font-weight: normal;
       }
 
@@ -30,6 +30,109 @@
 
   </head>
   <body>
+    <h1>Homework 2</h1>
+    <h2>Sydney Bednar (sb844), Victoria Eshun (vee4), Noorejehan Umar (nu44)</h2>
+    <svg id="bubble" width="500", height="500"></svg>
+    <div id="scatter"></g>
+    <script>
+      const bubble = d3.select("svg#bubble")
+      const bWidth = bubble.attr("width")
+      const bHeight = bubble.attr("height")
+      const margin = { top: 10, right: 10, bottom: 20, left: 20 };
+
+      const bubWidth = bWidth - margin.left - margin.right;
+      const bubHeight = bHeight - margin.top - margin.bottom;
+
+      const requestData = async () => {
+        let data = await d3.csv('clean_speeddating.csv', d3.autoType)
+        console.log(data);
+
+    // bubble plot work here
+    
+    // scatterplots work here **might have to do histograms
+        let scatGroup = d3.select("div#scatter")
+
+        let attributes = ['ambition_partner', 'attractive_partner', 'funny_partner', 
+        'intelligence_partner', 'shared_interests_partner', 'sincere_partner']
+
+        const sScales = {
+          "like": d3.scaleLinear().domain(d3.extent(data, d => d['like'])),
+          "attr_important": d3.scaleLinear().domain([0,100]),
+          "attr_partner": d3.scaleLinear().domain([0,10])
+        };
+
+
+        // add an svg for each attribute
+        attributes.forEach( (attr) => {
+
+          let svg = scatGroup.append("svg")
+                            .attr("class", attr)
+                            .attr("width", 300)
+                            .attr("height", 300)
+
+          drawScatter(svg, attr);
+
+        });
+
+        function drawScatter(svg, attr) {
+          let chartWidth = svg.attr("width") - margin.left - margin.right;
+          let chartHeight = svg.attr("height") - margin.top - margin.bottom;
+
+          let chartArea = svg.append("g")
+                             .classed(attr, true)
+                             .attr("translate", `translate(${margin.left}, ${margin.top})`)
+
+          let annotations = svg.append("g").attr("class", "annotations");
+
+          let xScale = sScales['attr_partner'].copy().range([0, chartWidth])
+          let yScale = sScales['like'].copy().range([chartHeight, 0])
+
+          let leftGridlines = d3.axisLeft(yScale).tickSize(-chartWidth).tickFormat("");
+          let bottomGridlines = d3.axisBottom(xScale).tickSize(-chartHeight)
+            .tickFormat("")
+
+          let leftAxis = d3.axisLeft(yScale);
+          let bottomAxis = d3.axisBottom(xScale);
+
+          annotations.append("g")
+            .attr("class", "x axis")
+            .attr("transform", `translate(${margin.left},${chartHeight + margin.top})`)
+            .call(bottomAxis);
+
+          annotations.append("g")
+            .attr("class", "y axis")
+            .attr("transform", `translate(${margin.left},${margin.top})`)
+            .call(leftAxis);
+
+          // annotations.append("g")
+          //   .attr("class", "x gridlines")
+          //   .attr("transform", `translate(0, ${chartHeight})`)
+          //   .call(bottomGridlines);
+
+          // annotations.append("g")
+          //   .attr("class", "y gridlines")
+          //   .call(leftGridlines);
+
+          console.log(attr)
+
+          // chartArea.selectAll(`circle.${attr}`)
+          //    .data(data)
+          //    .join("circle")
+          //    .attr("class", attr)
+          //    .attr("cx", d => xScale(d[attr]))
+          //    .attr("cy", d => yScale(d['like']))
+          //    .attr("r", 3)
+          
+          
+        }
+        
+
+    // filters work here
+
+      }
+      requestData();
+
+    </script>
    
   </body>
 </html>
