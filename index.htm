@@ -23,6 +23,11 @@
         text-align: center;
       }
 
+      .gridlines .domain {
+        display: "none";
+      }
+
+
        
     </style>
 
@@ -57,8 +62,8 @@
 
         const sScales = {
           "like": d3.scaleLinear().domain(d3.extent(data, d => d['like'])),
-          "attr_important": d3.scaleLinear().domain([0,100]),
-          "attr_partner": d3.scaleLinear().domain([0,10])
+          "attr_important": d3.scaleLinear().domain([0, 10]),
+          "attr_partner": d3.scaleLinear()
         };
 
 
@@ -78,16 +83,16 @@
           let chartWidth = svg.attr("width") - margin.left - margin.right;
           let chartHeight = svg.attr("height") - margin.top - margin.bottom;
 
+          let annotations = svg.append("g").attr("class", "annotations");
           let chartArea = svg.append("g")
                              .classed(attr, true)
                              .attr("translate", `translate(${margin.left}, ${margin.top})`)
 
-          let annotations = svg.append("g").attr("class", "annotations");
+          
 
-          let xScale = sScales['attr_partner'].copy().range([0, chartWidth])
+          let xScale = sScales['attr_partner'].copy().domain(d3.extent(data, d => d[attr])).range([0, chartWidth])
           let yScale = sScales['like'].copy().range([chartHeight, 0])
 
-          let leftGridlines = d3.axisLeft(yScale).tickSize(-chartWidth).tickFormat("");
           let bottomGridlines = d3.axisBottom(xScale).tickSize(-chartHeight)
             .tickFormat("")
 
@@ -104,25 +109,22 @@
             .attr("transform", `translate(${margin.left},${margin.top})`)
             .call(leftAxis);
 
-          // annotations.append("g")
-          //   .attr("class", "x gridlines")
-          //   .attr("transform", `translate(0, ${chartHeight})`)
-          //   .call(bottomGridlines);
+          annotations.append("g")
+            .attr("class", "x gridlines")
+            .attr("transform", `translate(${margin.left}, ${chartHeight + margin.top})`)
+            .call(bottomGridlines);
 
-          // annotations.append("g")
-          //   .attr("class", "y gridlines")
-          //   .call(leftGridlines);
 
           console.log(attr)
 
-          // chartArea.selectAll(`circle.${attr}`)
-          //    .data(data)
-          //    .join("circle")
-          //    .attr("class", attr)
-          //    .attr("cx", d => xScale(d[attr]))
-          //    .attr("cy", d => yScale(d['like']))
-          //    .attr("r", 3)
-          
+          // chartArea.selectAll(`circles.${attr}`)
+          //          .data(data)
+          //          .join("circle")
+          //          .attr("class", attr)
+          //          .attr("cx", d => xScale(d[attr]))
+          //          .attr("cy", d => yScale(d['like']))
+          //          .attr("r", 2)
+                
           
         }
         
