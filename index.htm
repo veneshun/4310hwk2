@@ -37,13 +37,15 @@
   <body>
     <h1>Homework 2</h1>
     <h2>Sydney Bednar (sb844), Victoria Eshun (vee4), Noorejehan Umar (nu44)</h2>
-    <svg id="bubble" width="500", height="500"></svg>
+    <svg id="bubble" width="1000", height="500"></svg>
     <div id="scatter"></g>
     <script>
       const bubble = d3.select("svg#bubble")
       const bWidth = bubble.attr("width")
       const bHeight = bubble.attr("height")
       const margin = { top: 10, right: 10, bottom: 20, left: 20 };
+      const circles = bubble.append("g").attr("id", "circles").attr('transform', 'translate(100,100)');
+
 
       const bubWidth = bWidth - margin.left - margin.right;
       const bubHeight = bHeight - margin.top - margin.bottom;
@@ -53,7 +55,47 @@
         console.log(data);
 
     // bubble plot work here
-    
+        const femaleData = data.filter(d=> d.gender === "female");
+        console.log(femaleData)
+
+        const attributeNames = Object.keys(femaleData[0]).filter(d => d !== "gender");
+        const attributeData = attributeNames.map(attribute => {
+          const ratings = femaleData.map(d => +d[attribute]);
+          const averageRating = d3.mean(ratings);
+          return { attribute, rating: averageRating };
+        });
+
+        const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
+
+        console.log(filteredAttributes)
+
+        const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
+        const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
+        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+        circles.selectAll('circle')
+        .data(filteredAttributes)
+        .enter()
+        .append('circle')
+        .attr('cx', (d, i) => (i * 120))
+        .attr("cy", bHeight/2)
+        .attr('r', d => sizeScale(d.rating))
+        .attr('fill', d => colorScale(d.attribute));
+
+        circles.selectAll("text")
+        .data(filteredAttributes)
+        .enter()
+        .append('text')
+        .text(d => d.attribute.replace('_important', ''))
+        .attr('x', (d, i) => (i * 120))
+        .attr('y', bHeight/2 - 80)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '11px')
+        .attr('fill', 'black');
+
+
+
+
     // scatterplots work here **might have to do histograms
         let scatGroup = d3.select("div#scatter")
 
