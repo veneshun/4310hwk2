@@ -40,6 +40,11 @@
     <svg id="bubble" width="1000", height="500"></svg>
     <button id="female">Female</button>
     <button id="male">Male</button>
+    <button id="European">European/Caucasian-American</button>
+    <button id="Asian">Asian/Pacific Islander/Asian-American </button>
+    <button id="Latino">Latino/Hispanic American</button>
+    <button id="Black">Black/African American</button>
+    <button id="Other">Other</button>
     <svg id="heatmap" width="1000", height="500"></svg>
     <div id="scatter"></g>
     <script>
@@ -50,6 +55,12 @@
       const circles = bubble.append("g").attr("id", "circles").attr('transform', 'translate(100,100)');
       const femaleButton = d3.select("#female")
       const maleButton = d3.select("#male")
+      const whiteButton = d3.select("#European")
+      const asianButton = d3.select("#Asian")
+      const latinoButton = d3.select("#Latino")
+      const blackButton = d3.select("#Black")
+      const otherButton = d3.select("#Other")
+     
 
 
       const bubWidth = bWidth - margin.left - margin.right;
@@ -106,11 +117,12 @@
        d3.selectAll("button").on("click", function updateChart()  {
           const selected = d3.select(this).attr("id")
           console.log(selected)
-          const selectedGender = data.filter(d=> d.gender === selected);
+          const selectedValue = data.filter(d=> d.gender === selected || d.race ===selected);
+          console.log(selectedValue)
 
-          const attributeNames = Object.keys(selectedGender[0]).filter(d => d !== "gender");
+          const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
           const attributeData = attributeNames.map(attribute => {
-            const ratings = selectedGender.map(d => +d[attribute]);
+            const ratings = selectedValue.map(d => +d[attribute]);
             const averageRating = d3.mean(ratings);
             return { attribute, rating: averageRating };
           });
@@ -165,9 +177,11 @@
 
         })
 
-        
+        // updateChart("female")
 
-        femaleButton.on("click", updateChart("female"))
+        // femaleButton.on("click", updateChart("female"))
+
+
  
 
 
