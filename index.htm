@@ -118,127 +118,162 @@
         // femaleButton.on("click", updateChart("female"))
 
        d3.selectAll("input").on("click", function updateChart()  {
-          const selected = d3.select(this).attr("id")
-          console.log(selected)
-          const selectedValue = data.filter(d=> d.gender === selected || d.race ===selected);
-          console.log(selectedValue)
-
-          const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
-          const attributeData = attributeNames.map(attribute => {
-            const ratings = selectedValue.map(d => +d[attribute]);
-            const averageRating = d3.mean(ratings);
-            return { attribute, rating: averageRating };
-          });
-
-          const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
-
-          console.log(filteredAttributes)
-
-          const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
-          const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
-          const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-
-          const circlesUpdated = circles.selectAll('circle').data(filteredAttributes);
-          const textUpdated = circles.selectAll('text').data(filteredAttributes);
-
-          circlesUpdated
-          .attr('cx', (d, i) => (i * 120))
-          .attr("cy", bHeight/2)
-          .attr('r', d => sizeScale(d.rating))
-          .attr('fill', d => colorScale(d.attribute));
-
-          textUpdated
-          .text(d => d.attribute.replace('_important', ''))
-          .attr('x', (d, i) => (i * 120))
-          .attr('y', bHeight/2 - 80)
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '11px')
-          .attr('fill', 'black');
-
-          circlesUpdated.exit().remove();
-          textUpdated.exit().remove();
-
-          circlesUpdated
-          .enter()
-          .append('circle')
-          .attr('cx', (d, i) => (i * 120))
-          .attr("cy", bHeight/2)
-          .attr('r', d => sizeScale(d.rating))
-          .attr('fill', d => colorScale(d.attribute));
-
-          textUpdated
-          .enter()
-          .append('text')
-          .text(d => d.attribute.replace('_important', ''))
-          .attr('x', (d, i) => (i * 120))
-          .attr('y', bHeight/2 - 80)
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '11px')
-          .attr('fill', 'black');
-          })
-          // const selectedValue = data.filter(d=> d.gender === filters[0] || d.race ===filters);
-          //console.log(selectedValue)
-
-          // const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
-          // const attributeData = attributeNames.map(attribute => {
-          //   const ratings = selectedValue.map(d => +d[attribute]);
-          //   const averageRating = d3.mean(ratings);
-          //   return { attribute, rating: averageRating };
-          // });
-
-          // const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
-
-          // console.log(filteredAttributes)
-
-          // const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
-          // const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
-          // const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-
-          // const circlesUpdated = circles.selectAll('circle').data(filteredAttributes);
-          // const textUpdated = circles.selectAll('text').data(filteredAttributes);
-
-          // circlesUpdated
-          // .attr('cx', (d, i) => (i * 120))
-          // .attr("cy", bHeight/2)
-          // .attr('r', d => sizeScale(d.rating))
-          // .attr('fill', d => colorScale(d.attribute));
-
-          // textUpdated
-          // .text(d => d.attribute.replace('_important', ''))
-          // .attr('x', (d, i) => (i * 120))
-          // .attr('y', bHeight/2 - 80)
-          // .attr('text-anchor', 'middle')
-          // .attr('font-size', '11px')
-          // .attr('fill', 'black');
-
-          // circlesUpdated.exit().remove();
-          // textUpdated.exit().remove();
 
 
-          // circlesUpdated
-          // .enter()
-          // .append('circle')
-          // .attr('cx', (d, i) => (i * 120))
-          // .attr("cy", bHeight/2)
-          // .attr('r', d => sizeScale(d.rating))
-          // .attr('fill', d => colorScale(d.attribute));
+       var filters = []
 
-          // textUpdated
-          // .enter()
-          // .append('text')
-          // .text(d => d.attribute.replace('_important', ''))
-          // .attr('x', (d, i) => (i * 120))
-          // .attr('y', bHeight/2 - 80)
-          // .attr('text-anchor', 'middle')
-          // .attr('font-size', '11px')
-          // .attr('fill', 'black');
-        
 
-        // })
+       if(d3.select("#female").property("checked")){
+         filters.push("female")
+       }
+       if(d3.select("#male").property("checked")){
+         filters.push("male")
+       }
+         // const selected = d3.select(this).attr("id")
+         // console.log(selected)
 
-        // updateChart("female")
 
-        // femaleButton.on("click", updateChart("female"))
+         console.log(filters)
+
+
+         filters.forEach(element => {
+           var selectedValue = data.filter(d=> d.gender === element || d.race === element);
+           console.log(selectedValue)
+           const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
+         const attributeData = attributeNames.map(attribute => {
+           const ratings = selectedValue.map(d => +d[attribute]);
+           const averageRating = d3.mean(ratings);
+           return { attribute, rating: averageRating };
+         });
+
+
+         const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
+
+
+         console.log(filteredAttributes)
+
+
+         const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
+         const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
+         const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+
+         const circlesUpdated = circles.selectAll('circle').data(filteredAttributes);
+         const textUpdated = circles.selectAll('text').data(filteredAttributes);
+
+
+         circlesUpdated
+         .attr('cx', (d, i) => (i * 120))
+         .attr("cy", bHeight/2)
+         .attr('r', d => sizeScale(d.rating))
+         .attr('fill', d => colorScale(d.attribute));
+
+
+         textUpdated
+         .text(d => d.attribute.replace('_important', ''))
+         .attr('x', (d, i) => (i * 120))
+         .attr('y', bHeight/2 - 80)
+         .attr('text-anchor', 'middle')
+         .attr('font-size', '11px')
+         .attr('fill', 'black');
+
+
+         circlesUpdated.exit().remove();
+         textUpdated.exit().remove();
+
+
+         circlesUpdated
+         .enter()
+         .append('circle')
+         .attr('cx', (d, i) => (i * 120))
+         .attr("cy", bHeight/2)
+         .attr('r', d => sizeScale(d.rating))
+         .attr('fill', d => colorScale(d.attribute));
+
+
+         textUpdated
+         .enter()
+         .append('text')
+         .text(d => d.attribute.replace('_important', ''))
+         .attr('x', (d, i) => (i * 120))
+         .attr('y', bHeight/2 - 80)
+         .attr('text-anchor', 'middle')
+         .attr('font-size', '11px')
+         .attr('fill', 'black');
+         })
+         // const selectedValue = data.filter(d=> d.gender === filters[0] || d.race ===filters);
+         //console.log(selectedValue)
+
+
+         // const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
+         // const attributeData = attributeNames.map(attribute => {
+         //   const ratings = selectedValue.map(d => +d[attribute]);
+         //   const averageRating = d3.mean(ratings);
+         //   return { attribute, rating: averageRating };
+         // });
+
+
+         // const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
+
+
+         // console.log(filteredAttributes)
+
+
+         // const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
+         // const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
+         // const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+
+         // const circlesUpdated = circles.selectAll('circle').data(filteredAttributes);
+         // const textUpdated = circles.selectAll('text').data(filteredAttributes);
+
+
+         // circlesUpdated
+         // .attr('cx', (d, i) => (i * 120))
+         // .attr("cy", bHeight/2)
+         // .attr('r', d => sizeScale(d.rating))
+         // .attr('fill', d => colorScale(d.attribute));
+
+
+         // textUpdated
+         // .text(d => d.attribute.replace('_important', ''))
+         // .attr('x', (d, i) => (i * 120))
+         // .attr('y', bHeight/2 - 80)
+         // .attr('text-anchor', 'middle')
+         // .attr('font-size', '11px')
+         // .attr('fill', 'black');
+
+
+         // circlesUpdated.exit().remove();
+         // textUpdated.exit().remove();
+
+
+
+
+         // circlesUpdated
+         // .enter()
+         // .append('circle')
+         // .attr('cx', (d, i) => (i * 120))
+         // .attr("cy", bHeight/2)
+         // .attr('r', d => sizeScale(d.rating))
+         // .attr('fill', d => colorScale(d.attribute));
+
+
+         // textUpdated
+         // .enter()
+         // .append('text')
+         // .text(d => d.attribute.replace('_important', ''))
+         // .attr('x', (d, i) => (i * 120))
+         // .attr('y', bHeight/2 - 80)
+         // .attr('text-anchor', 'middle')
+         // .attr('font-size', '11px')
+         // .attr('fill', 'black');
+      
+
+
+       })
+
+
 
 
  
