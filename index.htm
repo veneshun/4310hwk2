@@ -129,15 +129,27 @@
        if(d3.select("#male").property("checked")){
          filters.push("male")
        }
-         // const selected = d3.select(this).attr("id")
-         // console.log(selected)
-
+       if(d3.select("#European").property("checked")){
+         filters.push("European")
+       }
+       if(d3.select("#Asian").property("checked")){
+         filters.push("Asian")
+       }
+       if(d3.select("#Latino").property("checked")){
+         filters.push("Latino")
+       }
+       if(d3.select("#Black").property("checked")){
+         filters.push("Black")
+       }
+       if(d3.select("#Other").property("checked")){
+         filters.push("Other")
+       }
+       
 
          console.log(filters)
 
 
-         filters.forEach(element => {
-           var selectedValue = data.filter(d=> d.gender === element || d.race === element);
+           var selectedValue = data.filter(d=> filters.includes(d.gender) && filters.includes(d.race));
            console.log(selectedValue)
            const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
          const attributeData = attributeNames.map(attribute => {
@@ -269,9 +281,6 @@
          // .attr('font-size', '11px')
          // .attr('fill', 'black');
       
-
-
-       })
 
 
 
