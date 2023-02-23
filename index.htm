@@ -32,6 +32,8 @@
     </style>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/jeezy@1.13.1/lib/jeezy.js"></script>
+    <script src="https://unpkg.com/jeezy@1.13.1/lib/jeezy.min.js"></script>
 
   </head>
   <body>
@@ -45,7 +47,7 @@
     <input type="checkbox" id="Latino">Latino/Hispanic American</input>
     <input type="checkbox" id="Black">Black/African American</input>
     <input type="checkbox" id="Other">Other</input>
-    <svg id="heatmap" width="1000", height="500"></svg>
+    <svg id="heatmap" width="1000", height="200"></svg>
     <div id="scatter"></g>
     <script>
       const bubble = d3.select("svg#bubble")
@@ -115,7 +117,7 @@
         // maleButton.on("click", updateChart("male"))
         // femaleButton.on("click", updateChart("female"))
 
-       d3.selectAll("input").on("click", function updateChart()  {
+       d3.selectAll("input").on("change", function updateChart()  {
           const selected = d3.select(this).attr("id")
           console.log(selected)
           const selectedValue = data.filter(d=> d.gender === selected || d.race ===selected);
@@ -155,7 +157,6 @@
 
           circlesUpdated.exit().remove();
           textUpdated.exit().remove();
-
 
           circlesUpdated
           .enter()
@@ -281,59 +282,66 @@
         }
         
 
-    // // heatmaps work here
+    // heatmaps work here
 
         
 
-    //     let corr = await d3.csv('correlations.csv', d3.autoType)
+        let corr = await d3.csv('correlations.csv', d3.autoType)
 
-    //     console.log(corr[13]);
-
-
-    //     const heatmap = d3.select("svg#heatmap")
-    //     const width = heatmap.attr("width")
-    //     const height = heatmap.attr("height")
-
-    //     const attribs = ["attractive_partner","sincere_partner","funny_partner", 
-    //                   "ambition_partner", "intelligence_partner", "shared_interests_partner","like"]
-        
-    //     var x = d3.scaleBand()
-    //       .range([ 0, width ])
-    //       .domain([attribs])
-    //       .padding(0.01);
-    //     heatmap.append("g")
-    //       .attr("transform", "translate(0," + height + ")")
-    //       .call(d3.axisBottom(x))
-
-    //     // Build X scales and axis:
-    //     var y = d3.scaleBand()
-    //       .range([height, 0 ])
-    //       .domain(attribs)
-    //       .padding(0.01);
-    //     heatmap.append("g")
-    //       .call(d3.axisLeft(y));
-
-    //     // Build color scale
-    //     var myColor = d3.scaleLinear()
-    //       .range(["white", "#69b3a2"])
-    //       .domain([-1,1])
-
-    //     attribs.forEach((attrib) => {
-
-    //       heatmap.selectAll("rect.attr")
-    //         .data(corr)
-    //         .join("rect")
-    //         .attr("class", "attr")
-    //         .attr("x", d => x(d[attrib]))
-    //         .attr("y", y("like"))
-    //         .attr("width", x.bandwidth())
-    //         .attr("height", y.bandwidth())
-    //         .style("fill", d => myColor(d[attrib]))
-
-
-    //     });
         
 
+        console.log(corr[13]);
+
+
+        const heatmap = d3.select("svg#heatmap")
+        const width = heatmap.attr("width") - margin.left
+        const height = heatmap.attr("height") - margin.top -margin.bottom
+
+        const attribs = ["attractive_partner","sincere_partner","funny_partner", 
+                      "ambition_partner", "intelligence_partner", "shared_interests_partner",
+                      "like"]
+
+        console.log(jz.arr.correlationMatrix(data, attribs))
+        
+        var x = d3.scaleBand()
+          .range([ 0, width ])
+          .domain(attribs)
+          .padding(0.01);
+        heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, ${height})`)
+          .call(d3.axisBottom(x))
+
+        // Build X scales and axis:
+        var y = d3.scaleBand()
+          .range([height, 0 ])
+          .domain(["like"])
+          .padding(0.01);
+        heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, 0)`)
+          .call(d3.axisLeft(y));
+
+        // Build color scale
+        var myColor = d3.scaleLinear()
+          .range(["white", "#69b3a2"])
+          .domain([-1,1])
+
+        let heatArea = heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, 0)`)
+
+        // attribs.forEach((attrib) => {
+
+        //   heatArea.data(corr)
+        //     .append("rect")
+        //     .attr("class", attrib)
+        //     .attr("x", d => x(attrib))
+        //     .attr("y", y("like"))
+        //     .attr("width", x.bandwidth())
+        //     .attr("height", y.bandwidth())
+        //     .style("fill", d => myColor(d[attrib]))
+
+        // });
+        
+      
     
 
       }
