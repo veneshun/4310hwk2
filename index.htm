@@ -38,13 +38,13 @@
     <h1>Homework 2</h1>
     <h2>Sydney Bednar (sb844), Victoria Eshun (vee4), Noorejehan Umar (nu44)</h2>
     <svg id="bubble" width="1000", height="500"></svg>
-    <button id="female">Female</button>
-    <button id="male">Male</button>
-    <button id="European">European/Caucasian-American</button>
-    <button id="Asian">Asian/Pacific Islander/Asian-American </button>
-    <button id="Latino">Latino/Hispanic American</button>
-    <button id="Black">Black/African American</button>
-    <button id="Other">Other</button>
+    <input type="checkbox" id="female">Female</input>
+    <input type="checkbox" id="male">Male</input>
+    <input type="checkbox" id="European">European/Caucasian-American</input>
+    <input type="checkbox" id="Asian">Asian/Pacific Islander/Asian-American </input>
+    <input type="checkbox" id="Latino">Latino/Hispanic American</input>
+    <input type="checkbox" id="Black">Black/African American</input>
+    <input type="checkbox" id="Other">Other</input>
     <svg id="heatmap" width="1000", height="500"></svg>
     <div id="scatter"></g>
     <script>
@@ -68,6 +68,7 @@
 
       const requestData = async () => {
         let data = await d3.csv('clean_speeddating.csv', d3.autoType)
+        
         console.log(data);
 
     // bubble plot work here
@@ -114,7 +115,7 @@
         // maleButton.on("click", updateChart("male"))
         // femaleButton.on("click", updateChart("female"))
 
-       d3.selectAll("button").on("click", function updateChart()  {
+       d3.selectAll("input").on("click", function updateChart()  {
           const selected = d3.select(this).attr("id")
           console.log(selected)
           const selectedValue = data.filter(d=> d.gender === selected || d.race ===selected);
