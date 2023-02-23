@@ -38,6 +38,9 @@
     <h1>Homework 2</h1>
     <h2>Sydney Bednar (sb844), Victoria Eshun (vee4), Noorejehan Umar (nu44)</h2>
     <svg id="bubble" width="1000", height="500"></svg>
+    <button id="female">Female</button>
+    <button id="male">Male</button>
+    <svg id="heatmap" width="1000", height="500"></svg>
     <div id="scatter"></g>
     <script>
       const bubble = d3.select("svg#bubble")
@@ -45,6 +48,8 @@
       const bHeight = bubble.attr("height")
       const margin = { top: 10, right: 10, bottom: 40, left: 50 };
       const circles = bubble.append("g").attr("id", "circles").attr('transform', 'translate(100,100)');
+      const femaleButton = d3.select("#female")
+      const maleButton = d3.select("#male")
 
 
       const bubWidth = bWidth - margin.left - margin.right;
@@ -55,45 +60,94 @@
         console.log(data);
 
     // bubble plot work here
-        const femaleData = data.filter(d=> d.gender === "female");
-        console.log(femaleData)
+        // const femaleData = data.filter(d=> d.gender === "female");
+        // const maleData = data.filter(d=> d.gender === "male");
 
-        const attributeNames = Object.keys(femaleData[0]).filter(d => d !== "gender");
-        const attributeData = attributeNames.map(attribute => {
-          const ratings = femaleData.map(d => +d[attribute]);
-          const averageRating = d3.mean(ratings);
-          return { attribute, rating: averageRating };
-        });
+        // console.log(femaleData)
 
-        const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
+        // const attributeNames = Object.keys(selectedGender[0]).filter(d => d !== "gender");
+        // const attributeData = attributeNames.map(attribute => {
+        //   const ratings = selectedGender.map(d => +d[attribute]);
+        //   const averageRating = d3.mean(ratings);
+        //   return { attribute, rating: averageRating };
+        // });
 
-        console.log(filteredAttributes)
+        // const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
 
-        const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
-        const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
-        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+        // console.log(filteredAttributes)
 
-        circles.selectAll('circle')
-        .data(filteredAttributes)
-        .enter()
-        .append('circle')
-        .attr('cx', (d, i) => (i * 120))
-        .attr("cy", bHeight/2)
-        .attr('r', d => sizeScale(d.rating))
-        .attr('fill', d => colorScale(d.attribute));
+        // const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
+        // const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
+        // const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-        circles.selectAll("text")
-        .data(filteredAttributes)
-        .enter()
-        .append('text')
-        .text(d => d.attribute.replace('_important', ''))
-        .attr('x', (d, i) => (i * 120))
-        .attr('y', bHeight/2 - 80)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '11px')
-        .attr('fill', 'black');
+        // circles.selectAll('circle')
+        // .data(filteredAttributes)
+        // .enter()
+        // .append('circle')
+        // .attr('cx', (d, i) => (i * 120))
+        // .attr("cy", bHeight/2)
+        // .attr('r', d => sizeScale(d.rating))
+        // .attr('fill', d => colorScale(d.attribute));
 
+        // circles.selectAll("text")
+        // .data(filteredAttributes)
+        // .enter()
+        // .append('text')
+        // .text(d => d.attribute.replace('_important', ''))
+        // .attr('x', (d, i) => (i * 120))
+        // .attr('y', bHeight/2 - 80)
+        // .attr('text-anchor', 'middle')
+        // .attr('font-size', '11px')
+        // .attr('fill', 'black');
 
+        // maleButton.on("click", updateChart("male"))
+        // femaleButton.on("click", updateChart("female"))
+
+       d3.selectAll("button").on("click", function updateChart()  {
+          const selected = d3.select(this).attr("id")
+          console.log(selected)
+          const selectedGender = data.filter(d=> d.gender === selected);
+
+          const attributeNames = Object.keys(selectedGender[0]).filter(d => d !== "gender");
+          const attributeData = attributeNames.map(attribute => {
+            const ratings = selectedGender.map(d => +d[attribute]);
+            const averageRating = d3.mean(ratings);
+            return { attribute, rating: averageRating };
+          });
+
+          const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
+
+          console.log(filteredAttributes)
+
+          const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
+          const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
+          const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+          circles.selectAll('circle')
+          .data(filteredAttributes)
+          .enter()
+          .append('circle')
+          .attr('cx', (d, i) => (i * 120))
+          .attr("cy", bHeight/2)
+          .attr('r', d => sizeScale(d.rating))
+          .attr('fill', d => colorScale(d.attribute));
+
+          circles.selectAll("text")
+          .data(filteredAttributes)
+          .enter()
+          .append('text')
+          .text(d => d.attribute.replace('_important', ''))
+          .attr('x', (d, i) => (i * 120))
+          .attr('y', bHeight/2 - 80)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '11px')
+          .attr('fill', 'black');
+
+        })
+
+        
+
+        
 
 
     // scatterplots work here **might have to do histograms
@@ -192,6 +246,56 @@
         
 
     // filters work here
+
+        
+
+        // let corr = await d3.csv('correlations.csv', d3.autoType)
+
+        // console.log(corr);
+
+        // const heatmap = d3.select("#heatmap")
+        // const width = bubble.attr("width")
+        // const height = bubble.attr("height")
+        // const margins = { top: 10, right: 10, bottom: 40, left: 50 };
+
+        // const attribs = ["age","age_o","samerace","importance_same_race","importance_same_religion","pref_o_attractive","attractive_o","attractive_important","attractive","attractive_partner","sincere_partner","funny_partner","interests_correlate","like","guess_prob_liked","match"]
+
+        
+        
+        // var x = d3.scaleBand()
+        //   .range([ 0, width ])
+        //   .domain(attribs)
+        //   .padding(0.01);
+        // heatmap.append("g")
+        //   .attr("transform", "translate(0," + height + ")")
+        //   .call(d3.axisBottom(x))
+
+        // // Build X scales and axis:
+        // var y = d3.scaleBand()
+        //   .range([ height, 0 ])
+        //   .domain(attribs)
+        //   .padding(0.01);
+        // heatmap.append("g")
+        //   .call(d3.axisLeft(y));
+
+        // // Build color scale
+        // var myColor = d3.scaleLinear()
+        //   .range(["white", "#69b3a2"])
+        //   .domain([-1,1])
+
+
+        // heatmap.selectAll()
+        //       .data(corr)
+        //       .enter()
+        //       .append("rect")
+        //       .attr("x", x() )
+        //       .attr("y", y() )
+        //       .attr("width", x.bandwidth() )
+        //       .attr("height", y.bandwidth() )
+        //       .style("fill", function(d) { return myColor(d.value)} )
+
+
+    
 
       }
       requestData();
