@@ -123,8 +123,28 @@
           const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
           const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-          circles.selectAll('circle')
-          .data(filteredAttributes)
+          const circlesUpdated = circles.selectAll('circle').data(filteredAttributes);
+          const textUpdated = circles.selectAll('text').data(filteredAttributes);
+
+          circlesUpdated
+          .attr('cx', (d, i) => (i * 120))
+          .attr("cy", bHeight/2)
+          .attr('r', d => sizeScale(d.rating))
+          .attr('fill', d => colorScale(d.attribute));
+
+          textUpdated
+          .text(d => d.attribute.replace('_important', ''))
+          .attr('x', (d, i) => (i * 120))
+          .attr('y', bHeight/2 - 80)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '11px')
+          .attr('fill', 'black');
+
+          circlesUpdated.exit().remove();
+          textUpdated.exit().remove();
+
+
+          circlesUpdated
           .enter()
           .append('circle')
           .attr('cx', (d, i) => (i * 120))
@@ -132,8 +152,7 @@
           .attr('r', d => sizeScale(d.rating))
           .attr('fill', d => colorScale(d.attribute));
 
-          circles.selectAll("text")
-          .data(filteredAttributes)
+          textUpdated
           .enter()
           .append('text')
           .text(d => d.attribute.replace('_important', ''))
@@ -142,12 +161,14 @@
           .attr('text-anchor', 'middle')
           .attr('font-size', '11px')
           .attr('fill', 'black');
+        
 
         })
 
         
 
-        
+        femaleButton.on("click", updateChart("female"))
+ 
 
 
     // scatterplots work here **might have to do histograms
