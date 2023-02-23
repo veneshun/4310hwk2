@@ -234,7 +234,7 @@
           // .attr('fill', 'black');
         
 
-        })
+        // })
 
         // updateChart("female")
 
@@ -265,7 +265,7 @@
                             .attr("width", 300)
                             .attr("height", 300)
 
-          drawScatter(svg, attr);
+          // drawScatter(svg, attr);
 
         });
 
@@ -340,64 +340,56 @@
         
 
     // heatmaps work here
+        let corr = await d3.csv('correlations.csv', d3.autoType)
 
+        const heatmap = d3.select("svg#heatmap")
+        const width = heatmap.attr("width") - margin.left
+        const height = heatmap.attr("height") - margin.top - margin.bottom
+
+        const attribs = ["attractive_partner","sincere_partner","funny_partner", 
+                      "ambition_partner", "intelligence_partner", "shared_interests_partner",
+                      "like"]
+
+        console.log(jz.arr.correlationMatrix(data, attribs))
         
+        var x = d3.scaleBand()
+          .range([ 0, width ])
+          .domain(attribs)
+          .padding(0.01);
+        heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, ${height})`)
+          .call(d3.axisBottom(x))
 
-    //     let corr = await d3.csv('correlations.csv', d3.autoType)
-
-    //     console.log(corr[13]);
-
-
-    //     const heatmap = d3.select("svg#heatmap")
-    //     const width = heatmap.attr("width")
-    //     const height = heatmap.attr("height")
-
-    //     const attribs = ["attractive_partner","sincere_partner","funny_partner", 
-    //                   "ambition_partner", "intelligence_partner", "shared_interests_partner","like"]
-        
-    //     var x = d3.scaleBand()
-    //       .range([ 0, width ])
-    //       .domain([attribs])
-    //       .padding(0.01);
-    //     heatmap.append("g")
-    //       .attr("transform", "translate(0," + height + ")")
-    //       .call(d3.axisBottom(x))
-
-    //     // Build X scales and axis:
-    //     var y = d3.scaleBand()
-    //       .range([height, 0 ])
-    //       .domain(attribs)
-    //       .padding(0.01);
-    //     heatmap.append("g")
-    //       .call(d3.axisLeft(y));
+        // Build X scales and axis:
+        var y = d3.scaleBand()
+          .range([height, 0 ])
+          .domain(["like"])
+          .padding(0.01);
+        heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, 0)`)
+          .call(d3.axisLeft(y));
 
         // Build color scale
         var myColor = d3.scaleLinear()
           .range(["white", "#69b3a2"])
           .domain([-1,1])
 
-    //     attribs.forEach((attrib) => {
+        let heatArea = heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, 0)`)
 
-    //       heatmap.selectAll("rect.attr")
-    //         .data(corr)
-    //         .join("rect")
-    //         .attr("class", "attr")
-    //         .attr("x", d => x(d[attrib]))
-    //         .attr("y", y("like"))
-    //         .attr("width", x.bandwidth())
-    //         .attr("height", y.bandwidth())
-    //         .style("fill", d => myColor(d[attrib]))
+        attribs.forEach((attrib) => {
 
-        //   heatArea.data(corr)
-        //     .append("rect")
-        //     .attr("class", attrib)
-        //     .attr("x", d => x(attrib))
-        //     .attr("y", y("like"))
-        //     .attr("width", x.bandwidth())
-        //     .attr("height", y.bandwidth())
-        //     .style("fill", d => myColor(d[attrib]))
+          heatArea.data(corr)
+            .append("rect")
+            .attr("class", attrib)
+            .attr("x", d => x(attrib))
+            .attr("y", y("like"))
+            .attr("width", x.bandwidth())
+            .attr("height", y.bandwidth())
+            .style("fill", d => myColor(d[attrib]))
 
-    //     });
+        });
+        
         
       
     
