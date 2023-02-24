@@ -420,7 +420,7 @@
         let heatArea = heatmap.append("g")
           .attr("transform", `translate(${margin.left}, 0)`)
 
-        heatArea.selectAll("rect").data(corr)
+        heatArea.selectAll("rect.heat").data(corr_like)
                    .join("rect")
                    .attr("class", d => d.column_y)
                    .attr("x", d => x(d.column_y))

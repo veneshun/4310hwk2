@@ -19,14 +19,33 @@
         font-weight: normal;
       }
 
-      h3 {
-        text-align: center;
-      }
-
       .gridlines .domain {
         display: "none";
       }
 
+      div.child {
+        display: inline-block;
+      }
+
+      div#filters {
+        justify-items: center;
+        border: solid black;
+        border-radius: 2%;
+        padding: 1em;
+        margin: 1em;
+      }
+      div#filters input{
+        display: flex;
+        flex-direction: row;
+      }
+
+      div input {
+        display: flex;
+      }
+
+      div#container {
+        display: flex;
+      }
 
        
     </style>
@@ -39,15 +58,29 @@
   <body>
     <h1>Homework 2</h1>
     <h2>Sydney Bednar (sb844), Victoria Eshun (vee4), Noorejehan Umar (nu44)</h2>
-    <svg id="bubble" width="1000", height="500"></svg>
-    <input type="checkbox" id="female">Female</input>
-    <input type="checkbox" id="male">Male</input>
-    <input type="checkbox" id="European">European/Caucasian-American</input>
-    <input type="checkbox" id="Asian">Asian/Pacific Islander/Asian-American </input>
-    <input type="checkbox" id="Latino">Latino/Hispanic American</input>
-    <input type="checkbox" id="Black">Black/African American</input>
-    <input type="checkbox" id="Other">Other</input>
-    <svg id="heatmap" width="1000", height="200"></svg>
+    <div id="container">
+    <div id="filters" class="child">
+      <div id="gender">
+        <h3>Gender</h3>
+        <input type="checkbox" id="female">Female</input>
+        <input type="checkbox" id="male">Male</input>
+      </div>
+      <div id="race">
+        <h3>Race</h3>
+        <input type="checkbox" id="European">European/Caucasian-American</input>
+        <input type="checkbox" id="Asian">Asian/Pacific Islander/Asian-American </input>
+        <input type="checkbox" id="Latino">Latino/Hispanic American</input>
+        <input type="checkbox" id="Black">Black/African American</input>
+        <input type="checkbox" id="Other">Other</input>
+      </div>
+    </div>
+    <div id="charts" class="child">
+      <svg id="bubble" width="1000" , height="500"></svg>
+      
+      <svg id="heatmap" width="1000" , height="200"></svg>
+    </div>
+    </div>
+    
     <div id="scatter"></g>
     <script>
       const bubble = d3.select("svg#bubble")
@@ -117,7 +150,7 @@
         // maleButton.on("click", updateChart("male"))
         // femaleButton.on("click", updateChart("female"))
 
-       d3.selectAll("input").on("click", function updateChart()  {
+       d3.selectAll("input").on("change", function updateChart()  {
 
 
        var filters = []
@@ -144,15 +177,18 @@
        if(d3.select("#Other").property("checked")){
          filters.push("Other")
        }
+
+       updateHeat(filters); 
+       // update heatmap
        
 
          console.log(filters)
 
 
-           var selectedValue = data.filter(d=> filters.includes(d.gender) && filters.includes(d.race));
+           var selectedValue = data.filter(d=> filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
            console.log(selectedValue)
            const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
-         const attributeData = attributeNames.map(attribute => {
+           const attributeData = attributeNames.map(attribute => {
            const ratings = selectedValue.map(d => +d[attribute]);
            const averageRating = d3.mean(ratings);
            return { attribute, rating: averageRating };
@@ -280,11 +316,6 @@
          // .attr('text-anchor', 'middle')
          // .attr('font-size', '11px')
          // .attr('fill', 'black');
-      
-
-
-
-
  
 
 
@@ -309,7 +340,7 @@
                             .attr("width", 300)
                             .attr("height", 300)
 
-          drawScatter(svg, attr);
+          // drawScatter(svg, attr);
 
         });
 
@@ -385,20 +416,27 @@
         
 
     // heatmaps work here
-        let corr = await d3.csv('correlations.csv', d3.autoType)
-
         const heatmap = d3.select("svg#heatmap")
         const width = heatmap.attr("width") - margin.left
         const height = heatmap.attr("height") - margin.top - margin.bottom
 
-        const attribs = ["attractive_partner","sincere_partner","funny_partner", 
-                      "ambition_partner", "intelligence_partner", "shared_interests_partner",
-                      "like"]
+        const attribs = ["attractive_partner", "sincere_partner", "funny_partner",
+          "ambition_partner", "intelligence_partner", "shared_interests_partner",
+          "like"]
 
-        console.log(jz.arr.correlationMatrix(data, attribs))
+        function updateHeat(filters){
+          console.log(filters)
+          let corr_data = data.filter(d => filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
         
+      
+        let corr = jz.arr.correlationMatrix(corr_data, attribs)
+
+        let corr_like = corr.filter(d => d.column_x === "like")
+        console.log(corr_like)
+
+
         var x = d3.scaleBand()
-          .range([ 0, width ])
+          .range([0, width])
           .domain(attribs)
           .padding(0.01);
         heatmap.append("g")
@@ -407,7 +445,7 @@
 
         // Build X scales and axis:
         var y = d3.scaleBand()
-          .range([height, 0 ])
+          .range([height, 0])
           .domain(["like"])
           .padding(0.01);
         heatmap.append("g")
@@ -415,28 +453,29 @@
           .call(d3.axisLeft(y));
 
         // Build color scale
+
+        let corr_extent = d3.extent(corr_like, d => d.correlation)
+        // console.log(corr_extent)
         var myColor = d3.scaleLinear()
-          .range(["white", "#69b3a2"])
-          .domain([-1,1])
+          .range(["white", "red"])
+          .domain(corr_extent)
 
         let heatArea = heatmap.append("g")
           .attr("transform", `translate(${margin.left}, 0)`)
 
-        attribs.forEach((attrib) => {
+        heatArea.selectAll("rect.heat").data(corr_like)
+          .join("rect")
+          .attr("class", d => d.column_y)
+          .attr("x", d => x(d.column_y))
+          .attr("y", y("like"))
+          .attr("width", x.bandwidth())
+          .attr("height", y.bandwidth())
+          .style("fill", d => myColor(d.correlation))  
 
-          heatArea.data(corr)
-            .append("rect")
-            .attr("class", attrib)
-            .attr("x", d => x(attrib))
-            .attr("y", y("like"))
-            .attr("width", x.bandwidth())
-            .attr("height", y.bandwidth())
-            .style("fill", d => myColor(d[attrib]))
-
-        });
-        
-        
-      
+          // delete like from variables
+          // need to add legend!!
+          // also annotate with values
+        }
     
 
       }
