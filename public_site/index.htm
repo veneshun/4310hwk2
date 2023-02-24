@@ -22,6 +22,7 @@
       div.child {
         display: inline-block;
         justify-content: center;
+        margin-left: 1em;
       }
 
       div#filters {
@@ -32,7 +33,7 @@
       }
 
       div#filters input[type="checkbox"]{
-        appearance: none;
+        /* appearance: none; */
       }
 
       div#filters label{
@@ -44,6 +45,10 @@
 
       div#container {
         display: flex;
+      }
+
+      div.fill h2{
+        display: inline-block;
       }
 
        
@@ -96,8 +101,18 @@
     </div>
     <div id="charts" class="child">
       <h1>What do people THINK they prefer in a partner?</h1>
+      <div id="think-input" class="fill">
+        <h2>This chart shows that people who are...</h2><h2 class="fill"></h2>
+      </div>
+      <h2>...THINK that the most important attribute in a partner is...[INSERT HERE]</h2>
+      
       <svg id="bubble" width="1000" , height="200"></svg>
       <h1>What do people ACTUALLY prefer in a partner?</h1>
+      <div id="actual-input" class="fill">
+        <h2>This chart shows that people who are...</h2><h2 class="fill"></h2>
+      </div>
+      <h2>...ACTUALLY like a partner because of the attribute [INSERT HERE]</h2>
+    
       <svg id="heatmap" width="800" , height="200"></svg>
     </div>
     </div>
@@ -127,13 +142,13 @@
 
     // bubble plot work here
       
+       
 
        d3.selectAll("input").on("change", function updateChart()  {
       
         d3.select(this).style("font-weight", "bold")
 
-       var filters = []
-
+        var filters = []
 
        if(d3.select("#female").property("checked")){
          filters.push("female")
@@ -158,14 +173,14 @@
        }
 
        updateHeat(filters); 
+       updateText(filters);
+
+       console.log(filters)
 
 
        // update heatmap
-       
 
-         console.log(filters)
-
-
+        
            var selectedValue = data.filter(d=> filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
            console.log(selectedValue)
            const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
@@ -173,7 +188,7 @@
            const ratings = selectedValue.map(d => +d[attribute]);
            const averageRating = d3.mean(ratings);
            return { attribute, rating: averageRating };
-         });
+           });
 
 
          const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
@@ -235,98 +250,98 @@
 
 
     // scatterplots work here **might have to do histograms
-        let scatGroup = d3.select("div#scatter")
+        // let scatGroup = d3.select("div#scatter")
 
-        let attributes = ['ambition_partner', 'attractive_partner', 'funny_partner', 
-        'intelligence_partner', 'shared_interests_partner', 'sincere_partner']
+        // let attributes = ['ambition_partner', 'attractive_partner', 'funny_partner', 
+        // 'intelligence_partner', 'shared_interests_partner', 'sincere_partner']
 
-        const sScales = {
-          "like": d3.scaleLinear().domain(d3.extent(data, d => d['like'])),
-          "attr_important": d3.scaleLinear().domain([0, 10]),
-          "attr_partner": d3.scaleLinear()
-        };
+        // const sScales = {
+        //   "like": d3.scaleLinear().domain(d3.extent(data, d => d['like'])),
+        //   "attr_important": d3.scaleLinear().domain([0, 10]),
+        //   "attr_partner": d3.scaleLinear()
+        // };
 
 
-        // add an svg for each attribute
-        attributes.forEach( (attr) => {
+        // // add an svg for each attribute
+        // attributes.forEach( (attr) => {
 
-          let svg = scatGroup.append("svg")
-                            .attr("class", attr)
-                            .attr("width", 300)
-                            .attr("height", 300)
+        //   let svg = scatGroup.append("svg")
+        //                     .attr("class", attr)
+        //                     .attr("width", 300)
+        //                     .attr("height", 300)
 
-          // drawScatter(svg, attr);
+        //   // drawScatter(svg, attr);
 
-        });
+        // });
 
-        function jitter(min, max) {
-          return (Math.random() * (max - min) + min)
-        };
+        // function jitter(min, max) {
+        //   return (Math.random() * (max - min) + min)
+        // };
 
-        // function to draw scatterplots
-        function drawScatter(svg, attr) {
-          let chartWidth = svg.attr("width") - margin.left - margin.right;
-          let chartHeight = svg.attr("height") - margin.top - margin.bottom;
+        // // function to draw scatterplots
+        // function drawScatter(svg, attr) {
+        //   let chartWidth = svg.attr("width") - margin.left - margin.right;
+        //   let chartHeight = svg.attr("height") - margin.top - margin.bottom;
 
-          let annotations = svg.append("g").attr("class", "annotations");
+        //   let annotations = svg.append("g").attr("class", "annotations");
 
 
           
 
-          let xScale = sScales['attr_partner'].copy().domain(d3.extent(data, d => d[attr])).range([0, chartWidth])
-          let yScale = sScales['like'].copy().range([chartHeight, 0])
+        //   let xScale = sScales['attr_partner'].copy().domain(d3.extent(data, d => d[attr])).range([0, chartWidth])
+        //   let yScale = sScales['like'].copy().range([chartHeight, 0])
 
-          let bottomGridlines = d3.axisBottom(xScale).tickSize(-chartHeight)
-            .tickFormat("")
+        //   let bottomGridlines = d3.axisBottom(xScale).tickSize(-chartHeight)
+        //     .tickFormat("")
 
-          let leftAxis = d3.axisLeft(yScale);
-          let bottomAxis = d3.axisBottom(xScale);
+        //   let leftAxis = d3.axisLeft(yScale);
+        //   let bottomAxis = d3.axisBottom(xScale);
 
-          annotations.append("g")
-            .attr("class", "x axis")
-            .attr("transform", `translate(${margin.left},${chartHeight + margin.top})`)
-            .call(bottomAxis);
+        //   annotations.append("g")
+        //     .attr("class", "x axis")
+        //     .attr("transform", `translate(${margin.left},${chartHeight + margin.top})`)
+        //     .call(bottomAxis);
 
-          annotations.append("g")
-            .attr("class", "y axis")
-            .attr("transform", `translate(${margin.left},${margin.top})`)
-            .call(leftAxis);
+        //   annotations.append("g")
+        //     .attr("class", "y axis")
+        //     .attr("transform", `translate(${margin.left},${margin.top})`)
+        //     .call(leftAxis);
 
-          annotations.append("g")
-            .attr("class", "x gridlines")
-            .attr("transform", `translate(${margin.left}, ${chartHeight + margin.top})`)
-            .call(bottomGridlines);
-
-
-          console.log(attr)
-
-          let chartArea = svg.append("g")
-                             .classed(attr, true)
-                             .attr("translate", `translate(${margin.left}, ${margin.top})`)
+        //   annotations.append("g")
+        //     .attr("class", "x gridlines")
+        //     .attr("transform", `translate(${margin.left}, ${chartHeight + margin.top})`)
+        //     .call(bottomGridlines);
 
 
-          chartArea.append("g").selectAll(`circles.${attr}`)
-                   .data(data)
-                   .join("circle")
-                   .attr("class", attr)
-                   .attr("id", d => d['like'])
-                   .attr("cx", d => xScale(d[attr])+jitter(-4,4))
-                   .attr("cy", d => yScale(d['like'])+ jitter(-4, 4))
-                   .attr("r", 2)
-                   .attr("transform", `translate(${margin.left},${margin.top})`)
+        //   console.log(attr)
+
+        //   let chartArea = svg.append("g")
+        //                      .classed(attr, true)
+        //                      .attr("translate", `translate(${margin.left}, ${margin.top})`)
+
+
+        //   chartArea.append("g").selectAll(`circles.${attr}`)
+        //            .data(data)
+        //            .join("circle")
+        //            .attr("class", attr)
+        //            .attr("id", d => d['like'])
+        //            .attr("cx", d => xScale(d[attr])+jitter(-4,4))
+        //            .attr("cy", d => yScale(d['like'])+ jitter(-4, 4))
+        //            .attr("r", 2)
+        //            .attr("transform", `translate(${margin.left},${margin.top})`)
           
-          annotations.append("text").text(attr).attr("x", -chartHeight/2)
-            .attr("y", 20)
-            .attr("text-anchor", "middle")
-            .style("font-size", "16px")
-            .attr("transform", "rotate(-90)")
+        //   annotations.append("text").text(attr).attr("x", -chartHeight/2)
+        //     .attr("y", 20)
+        //     .attr("text-anchor", "middle")
+        //     .style("font-size", "16px")
+        //     .attr("transform", "rotate(-90)")
           
-          annotations.append("text").text("like").attr("x", chartWidth/2 + margin.left)
-            .attr("y", chartHeight + margin.top + margin.bottom -5)
-            .attr("text-anchor", "middle")
-            .style("font-size", "16px")
+        //   annotations.append("text").text("like").attr("x", chartWidth/2 + margin.left)
+        //     .attr("y", chartHeight + margin.top + margin.bottom -5)
+        //     .attr("text-anchor", "middle")
+        //     .style("font-size", "16px")
                 
-        } 
+        // } 
         // drawScatter();
         
 
@@ -349,7 +364,6 @@
           .attr("transform", `translate(${margin.left}, ${height})`)
           .call(d3.axisBottom(x))
 
-        // Build X scales and axis:
         var y = d3.scaleBand()
           .range([height, 0])
           .domain(["like"])
@@ -358,52 +372,85 @@
           .attr("transform", `translate(${margin.left}, 0)`)
           .call(d3.axisLeft(y));
 
-        function updateHeat(filters){
-          console.log(filters)
-          let corr_data = data.filter(d => filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
-        
-      
-        let corr = jz.arr.correlationMatrix(corr_data, attribs)
-
-        let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
-        console.log(corr_like)
-
-
-        // Build color scale
-
-        let corr_extent = d3.extent(corr_like, d => d.correlation)
-        // console.log(corr_extent)
         var myColor = d3.scaleLinear()
           .range(["white", "red"])
-          .domain([0,1])
+          .domain([0, 1])
 
         let heatArea = heatmap.append("g")
           .attr("transform", `translate(${margin.left}, 0)`)
 
-        const rects = heatArea.selectAll("rect.heat").data(corr_like) 
+        let corr = jz.arr.correlationMatrix(data, attribs)
+
+        let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
+
+        const rects = heatArea.selectAll("rect.heat").data(corr_like)
         const text = heatArea.selectAll("text.heat").data(corr_like)
 
-        rects.exit().remove();
-        
         rects.enter().append("rect")
           .attr("class", "heat")
           .attr("x", d => x(d.column_y))
           .attr("y", y("like"))
           .attr("width", x.bandwidth())
           .attr("height", y.bandwidth())
-          .style("fill", d => myColor(d.correlation))  
-
-
-        text.exit().remove();
+          .style("fill", d => myColor(d.correlation))
 
         text.enter().append("text").attr("class", "heat")
-            .attr("x", d => x(d.column_y) + 40)
-            .attr("y", y.bandwidth()/2 + 5)
-            .text(d => d.correlation.toFixed(2))
+          .attr("x", d => x(d.column_y) + 40)
+          .attr("y", y.bandwidth() / 2 + 5)
+          .text(d => d.correlation.toFixed(2))
 
-          // delete like from variables
-          // need to add legend!!
-          // also annotate with values
+        function updateHeat(filters){
+
+          let corr_data = data.filter(d => filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
+      
+          let corr = jz.arr.correlationMatrix(corr_data, attribs)
+
+          let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
+
+          let corr_extent = d3.extent(corr_like, d => d.correlation)
+          // console.log(corr_extent)
+          var myColor = d3.scaleLinear()
+            .range(["white", "red"])
+            .domain([0,1])
+
+          let heatArea = heatmap.append("g")
+            .attr("transform", `translate(${margin.left}, 0)`)
+
+          const rects = heatArea.selectAll("rect.heat").data(corr_like) 
+          const text = heatArea.selectAll("text.heat").data(corr_like)
+
+          rects.exit().remove();
+          
+          rects.enter().append("rect")
+            .attr("class", "heat")
+            .attr("x", d => x(d.column_y))
+            .attr("y", y("like"))
+            .attr("width", x.bandwidth())
+            .attr("height", y.bandwidth())
+            .style("fill", d => myColor(d.correlation))  
+
+
+          text.exit().remove();
+
+          text.enter().append("text").attr("class", "heat")
+              .attr("x", d => x(d.column_y) + 40)
+              .attr("y", y.bandwidth()/2 + 5)
+              .text(d => d.correlation.toFixed(2))
+
+            // delete like from variables
+            // need to add legend!!
+            // also annotate with values
+        }
+
+        const inputDiv = d3.selectAll("h2.fill");
+
+        // trying to add a dynamically changing text based on filters
+        function updateText(filters){
+
+          inputDiv.text(filters)
+                  .attr("class","select")
+                  .style("font-weight", "bold");
+
         }
     
 
