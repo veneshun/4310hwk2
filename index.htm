@@ -1,0 +1,440 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+
+    <title>Speed Dating</title>
+
+    <style>
+      body {
+        margin: 1in;
+        font-family: "Avenir", sans-serif;
+      }
+
+      h1{
+        font-family: "Sinhala MN";
+      }
+
+      h2 {
+        font-size: 16;
+        font-weight: normal;
+      }
+
+      h3 {
+        text-align: center;
+      }
+
+      .gridlines .domain {
+        display: "none";
+      }
+
+
+       
+    </style>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/jeezy@1.13.1/lib/jeezy.js"></script>
+    <script src="https://unpkg.com/jeezy@1.13.1/lib/jeezy.min.js"></script>
+
+  </head>
+  <body>
+    <h1>Homework 2</h1>
+    <h2>Sydney Bednar (sb844), Victoria Eshun (vee4), Noorejehan Umar (nu44)</h2>
+    <svg id="bubble" width="1000", height="500"></svg>
+    <input type="checkbox" id="female">Female</input>
+    <input type="checkbox" id="male">Male</input>
+    <input type="checkbox" id="European">European/Caucasian-American</input>
+    <input type="checkbox" id="Asian">Asian/Pacific Islander/Asian-American </input>
+    <input type="checkbox" id="Latino">Latino/Hispanic American</input>
+    <input type="checkbox" id="Black">Black/African American</input>
+    <input type="checkbox" id="Other">Other</input>
+    <svg id="heatmap" width="1000", height="200"></svg>
+    <div id="scatter"></g>
+    <script>
+      const bubble = d3.select("svg#bubble")
+      const bWidth = bubble.attr("width")
+      const bHeight = bubble.attr("height")
+      const margin = { top: 10, right: 10, bottom: 40, left: 50 };
+      const circles = bubble.append("g").attr("id", "circles").attr('transform', 'translate(100,100)');
+      const femaleButton = d3.select("#female")
+      const maleButton = d3.select("#male")
+      const whiteButton = d3.select("#European")
+      const asianButton = d3.select("#Asian")
+      const latinoButton = d3.select("#Latino")
+      const blackButton = d3.select("#Black")
+      const otherButton = d3.select("#Other")
+     
+
+
+      const bubWidth = bWidth - margin.left - margin.right;
+      const bubHeight = bHeight - margin.top - margin.bottom;
+
+      const requestData = async () => {
+        let data = await d3.csv('clean_speeddating.csv', d3.autoType)
+        
+        console.log(data);
+
+    // bubble plot work here
+        // const femaleData = data.filter(d=> d.gender === "female");
+        // const maleData = data.filter(d=> d.gender === "male");
+
+        // console.log(femaleData)
+
+        // const attributeNames = Object.keys(selectedGender[0]).filter(d => d !== "gender");
+        // const attributeData = attributeNames.map(attribute => {
+        //   const ratings = selectedGender.map(d => +d[attribute]);
+        //   const averageRating = d3.mean(ratings);
+        //   return { attribute, rating: averageRating };
+        // });
+
+        // const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
+
+        // console.log(filteredAttributes)
+
+        // const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
+        // const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
+        // const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+        // circles.selectAll('circle')
+        // .data(filteredAttributes)
+        // .enter()
+        // .append('circle')
+        // .attr('cx', (d, i) => (i * 120))
+        // .attr("cy", bHeight/2)
+        // .attr('r', d => sizeScale(d.rating))
+        // .attr('fill', d => colorScale(d.attribute));
+
+        // circles.selectAll("text")
+        // .data(filteredAttributes)
+        // .enter()
+        // .append('text')
+        // .text(d => d.attribute.replace('_important', ''))
+        // .attr('x', (d, i) => (i * 120))
+        // .attr('y', bHeight/2 - 80)
+        // .attr('text-anchor', 'middle')
+        // .attr('font-size', '11px')
+        // .attr('fill', 'black');
+
+        // maleButton.on("click", updateChart("male"))
+        // femaleButton.on("click", updateChart("female"))
+
+       d3.selectAll("input").on("click", function updateChart()  {
+
+
+       var filters = []
+
+
+       if(d3.select("#female").property("checked")){
+         filters.push("female")
+       }
+       if(d3.select("#male").property("checked")){
+         filters.push("male")
+       }
+         // const selected = d3.select(this).attr("id")
+         // console.log(selected)
+
+
+         console.log(filters)
+
+
+         filters.forEach(element => {
+           var selectedValue = data.filter(d=> d.gender === element || d.race === element);
+           console.log(selectedValue)
+           const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
+         const attributeData = attributeNames.map(attribute => {
+           const ratings = selectedValue.map(d => +d[attribute]);
+           const averageRating = d3.mean(ratings);
+           return { attribute, rating: averageRating };
+         });
+
+
+         const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
+
+
+         console.log(filteredAttributes)
+
+
+         const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
+         const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
+         const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+
+         const circlesUpdated = circles.selectAll('circle').data(filteredAttributes);
+         const textUpdated = circles.selectAll('text').data(filteredAttributes);
+
+
+         circlesUpdated
+         .attr('cx', (d, i) => (i * 120))
+         .attr("cy", bHeight/2)
+         .attr('r', d => sizeScale(d.rating))
+         .attr('fill', d => colorScale(d.attribute));
+
+
+         textUpdated
+         .text(d => d.attribute.replace('_important', ''))
+         .attr('x', (d, i) => (i * 120))
+         .attr('y', bHeight/2 - 80)
+         .attr('text-anchor', 'middle')
+         .attr('font-size', '11px')
+         .attr('fill', 'black');
+
+
+         circlesUpdated.exit().remove();
+         textUpdated.exit().remove();
+
+
+         circlesUpdated
+         .enter()
+         .append('circle')
+         .attr('cx', (d, i) => (i * 120))
+         .attr("cy", bHeight/2)
+         .attr('r', d => sizeScale(d.rating))
+         .attr('fill', d => colorScale(d.attribute));
+
+
+         textUpdated
+         .enter()
+         .append('text')
+         .text(d => d.attribute.replace('_important', ''))
+         .attr('x', (d, i) => (i * 120))
+         .attr('y', bHeight/2 - 80)
+         .attr('text-anchor', 'middle')
+         .attr('font-size', '11px')
+         .attr('fill', 'black');
+         })
+         // const selectedValue = data.filter(d=> d.gender === filters[0] || d.race ===filters);
+         //console.log(selectedValue)
+
+
+         // const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
+         // const attributeData = attributeNames.map(attribute => {
+         //   const ratings = selectedValue.map(d => +d[attribute]);
+         //   const averageRating = d3.mean(ratings);
+         //   return { attribute, rating: averageRating };
+         // });
+
+
+         // const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
+
+
+         // console.log(filteredAttributes)
+
+
+         // const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
+         // const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
+         // const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+
+         // const circlesUpdated = circles.selectAll('circle').data(filteredAttributes);
+         // const textUpdated = circles.selectAll('text').data(filteredAttributes);
+
+
+         // circlesUpdated
+         // .attr('cx', (d, i) => (i * 120))
+         // .attr("cy", bHeight/2)
+         // .attr('r', d => sizeScale(d.rating))
+         // .attr('fill', d => colorScale(d.attribute));
+
+
+         // textUpdated
+         // .text(d => d.attribute.replace('_important', ''))
+         // .attr('x', (d, i) => (i * 120))
+         // .attr('y', bHeight/2 - 80)
+         // .attr('text-anchor', 'middle')
+         // .attr('font-size', '11px')
+         // .attr('fill', 'black');
+
+
+         // circlesUpdated.exit().remove();
+         // textUpdated.exit().remove();
+
+
+
+
+         // circlesUpdated
+         // .enter()
+         // .append('circle')
+         // .attr('cx', (d, i) => (i * 120))
+         // .attr("cy", bHeight/2)
+         // .attr('r', d => sizeScale(d.rating))
+         // .attr('fill', d => colorScale(d.attribute));
+
+
+         // textUpdated
+         // .enter()
+         // .append('text')
+         // .text(d => d.attribute.replace('_important', ''))
+         // .attr('x', (d, i) => (i * 120))
+         // .attr('y', bHeight/2 - 80)
+         // .attr('text-anchor', 'middle')
+         // .attr('font-size', '11px')
+         // .attr('fill', 'black');
+      
+
+
+       })
+
+
+
+
+ 
+
+
+    // scatterplots work here **might have to do histograms
+        let scatGroup = d3.select("div#scatter")
+
+        let attributes = ['ambition_partner', 'attractive_partner', 'funny_partner', 
+        'intelligence_partner', 'shared_interests_partner', 'sincere_partner']
+
+        const sScales = {
+          "like": d3.scaleLinear().domain(d3.extent(data, d => d['like'])),
+          "attr_important": d3.scaleLinear().domain([0, 10]),
+          "attr_partner": d3.scaleLinear()
+        };
+
+
+        // add an svg for each attribute
+        attributes.forEach( (attr) => {
+
+          let svg = scatGroup.append("svg")
+                            .attr("class", attr)
+                            .attr("width", 300)
+                            .attr("height", 300)
+
+          // drawScatter(svg, attr);
+
+        });
+
+        function jitter(min, max) {
+          return (Math.random() * (max - min) + min)
+        };
+
+        // function to draw scatterplots
+        function drawScatter(svg, attr) {
+          let chartWidth = svg.attr("width") - margin.left - margin.right;
+          let chartHeight = svg.attr("height") - margin.top - margin.bottom;
+
+          let annotations = svg.append("g").attr("class", "annotations");
+
+
+          
+
+          let xScale = sScales['attr_partner'].copy().domain(d3.extent(data, d => d[attr])).range([0, chartWidth])
+          let yScale = sScales['like'].copy().range([chartHeight, 0])
+
+          let bottomGridlines = d3.axisBottom(xScale).tickSize(-chartHeight)
+            .tickFormat("")
+
+          let leftAxis = d3.axisLeft(yScale);
+          let bottomAxis = d3.axisBottom(xScale);
+
+          annotations.append("g")
+            .attr("class", "x axis")
+            .attr("transform", `translate(${margin.left},${chartHeight + margin.top})`)
+            .call(bottomAxis);
+
+          annotations.append("g")
+            .attr("class", "y axis")
+            .attr("transform", `translate(${margin.left},${margin.top})`)
+            .call(leftAxis);
+
+          annotations.append("g")
+            .attr("class", "x gridlines")
+            .attr("transform", `translate(${margin.left}, ${chartHeight + margin.top})`)
+            .call(bottomGridlines);
+
+
+          console.log(attr)
+
+          let chartArea = svg.append("g")
+                             .classed(attr, true)
+                             .attr("translate", `translate(${margin.left}, ${margin.top})`)
+
+
+          chartArea.append("g").selectAll(`circles.${attr}`)
+                   .data(data)
+                   .join("circle")
+                   .attr("class", attr)
+                   .attr("id", d => d['like'])
+                   .attr("cx", d => xScale(d[attr])+jitter(-4,4))
+                   .attr("cy", d => yScale(d['like'])+ jitter(-4, 4))
+                   .attr("r", 2)
+                   .attr("transform", `translate(${margin.left},${margin.top})`)
+          
+          annotations.append("text").text(attr).attr("x", -chartHeight/2)
+            .attr("y", 20)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .attr("transform", "rotate(-90)")
+          
+          annotations.append("text").text("like").attr("x", chartWidth/2 + margin.left)
+            .attr("y", chartHeight + margin.top + margin.bottom -5)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+                
+        } 
+        // drawScatter();
+        
+
+    // heatmaps work here
+        
+
+        const heatmap = d3.select("svg#heatmap")
+        const width = heatmap.attr("width") - margin.left
+        const height = heatmap.attr("height") - margin.top - margin.bottom
+
+        const attribs = ["attractive_partner","sincere_partner","funny_partner", 
+                      "ambition_partner", "intelligence_partner", "shared_interests_partner",
+                      "like"]
+
+        let corr = jz.arr.correlationMatrix(data, attribs)
+
+        let corr_like = corr.filter(d => d.column_x==="like")
+        console.log(corr_like)
+        
+        
+        var x = d3.scaleBand()
+          .range([ 0, width ])
+          .domain(attribs)
+          .padding(0.01);
+        heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, ${height})`)
+          .call(d3.axisBottom(x))
+
+        // Build X scales and axis:
+        var y = d3.scaleBand()
+          .range([height, 0 ])
+          .domain(["like"])
+          .padding(0.01);
+        heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, 0)`)
+          .call(d3.axisLeft(y));
+
+        // Build color scale
+
+        // let corr_extent = d3.extent(corr_like, d => d.correlation)
+        // console.log(corr_extent)
+        var myColor = d3.scaleLinear()
+          .range(["white", "#69b3a2"])
+          .domain([0,1])
+
+        let heatArea = heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, 0)`)
+
+        heatArea.selectAll("rect").data(corr)
+                   .join("rect")
+                   .attr("class", d => d.column_y)
+                   .attr("x", d => x(d.column_y))
+                   .attr("y", y("like"))
+                   .attr("width", x.bandwidth())
+                   .attr("height", y.bandwidth())
+                   .style("fill", d => myColor(d.correlation))   
+      
+    
+
+      }
+      requestData();
+
+    </script>
+   
+  </body>
+</html>
