@@ -204,6 +204,15 @@
        updateHeat(filters); 
        updateText(filters);
 
+
+       if (filters.length === 0) {
+    
+    circles.selectAll('circle').remove();
+    circles.selectAll('text').remove();
+    return;
+  }
+
+
     //   console.log(filters)
 
 
@@ -222,17 +231,9 @@
 
            
 
-        // Dynamic Text for Bubble Chart
+   
          const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
-         const inputTop = d3.select("h2#top");
-
-          let rating_sorted = filteredAttributes.sort((a, b) => a.rating - b.rating);
-
-          const highestRating = rating_sorted[rating_sorted.length - 1].rating; 
-
-          inputTop.data(rating_sorted)
-            .text(`${rating_sorted[rating_sorted.length - 1].attribute.replace("_important", "")}`)
-            .style("font-weight", "bold");
+        
 
 
        //  console.log(filteredAttributes)
@@ -288,7 +289,17 @@
          .attr('fill', 'black');
 
 
-  
+   
+         const inputTop = d3.select("h2#top");
+
+        let rating_sorted = filteredAttributes.sort((a, b) => a.rating - b.rating);
+
+        const highestRating = rating_sorted[rating_sorted.length - 1].rating; 
+
+        inputTop.data(rating_sorted)
+          .text(`${rating_sorted[rating_sorted.length - 1].attribute.replace("_important", "")}`)
+          .style("font-weight", "bold");
+
 
           //inputCorr.data(sorted).text(d => d.column_y.replace("_partner", "")).style("font-weight", "bold")
          })
