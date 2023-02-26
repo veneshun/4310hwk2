@@ -116,16 +116,28 @@
     <div id="charts" class="child">
       <h1>What do people THINK they prefer in a partner?</h1>
       <div id="think-input" class="fill">
-        <h2>This chart shows that people who are...</h2><h2 class="fill"></h2>
+        <h2>This chart shows that people who are </h2>
+        <h2 class="fill"></h2>
       </div>
-      <h2>...THINK that the most important attribute in a partner is...[INSERT HERE]</h2>
+      <h2><i>THINK</i> that the most important attribute in a partner is [INSERT HERE]</h2>
+      
       
       <svg id="bubble" width="1000" , height="200"></svg>
       <h1>What do people ACTUALLY prefer in a partner?</h1>
       <div id="actual-input" class="fill">
-        <h2>This chart shows that people who are...</h2><h2 class="fill"></h2>
+        <h2>This chart shows that people who are</h2>
+        <h2 class="fill"></h2>
+        
       </div>
-      <h2>...ACTUALLY like a partner because of the attribute [INSERT HERE]</h2>
+
+      <div class="fill">
+        <h2><i>ACTUALLY</i> like a partner because of the attribute</h2>
+      <h2 id="corr"></h2>
+      </div>
+      
+
+      
+      
     
       <svg id="heatmap" width="800" , height="200"></svg>
     </div>
@@ -374,17 +386,18 @@
           .range([0, width])
           .domain(noLike)
           .padding(0.01);
-        heatmap.append("g")
+        const bottomG = heatmap.append("g")
           .attr("transform", `translate(${margin.left}, ${height})`)
-          .call(d3.axisBottom(x))
+          
 
         var y = d3.scaleBand()
           .range([height, 0])
           .domain(["like"])
           .padding(0.01);
-        heatmap.append("g")
+
+        const leftG = heatmap.append("g")
           .attr("transform", `translate(${margin.left}, 0)`)
-          .call(d3.axisLeft(y));
+          
 
         var myColor = d3.scaleLinear()
           .range(["white", "red"])
@@ -400,20 +413,26 @@
         const rects = heatArea.selectAll("rect.heat").data(corr_like)
         const text = heatArea.selectAll("text.heat").data(corr_like)
 
-        rects.enter().append("rect")
-          .attr("class", "heat")
-          .attr("x", d => x(d.column_y))
-          .attr("y", y("like"))
-          .attr("width", x.bandwidth())
-          .attr("height", y.bandwidth())
-          .style("fill", d => myColor(d.correlation))
+        // // default??
+        // rects.enter().append("rect")
+        //   .attr("class", "heat")
+        //   .attr("x", d => x(d.column_y))
+        //   .attr("y", y("like"))
+        //   .attr("width", x.bandwidth())
+        //   .attr("height", y.bandwidth())
+        //   .style("fill", d => myColor(d.correlation))
 
-        text.enter().append("text").attr("class", "heat")
-          .attr("x", d => x(d.column_y) + 40)
-          .attr("y", y.bandwidth() / 2 + 5)
-          .text(d => d.correlation.toFixed(2))
+        // text.enter().append("text").attr("class", "heat")
+        //   .attr("x", d => x(d.column_y) + 40)
+        //   .attr("y", y.bandwidth() / 2 + 5)
+        //   .text(d => d.correlation.toFixed(2))
+
+        const inputCorr = d3.select("h2#corr");
 
         function updateHeat(filters){
+
+          leftG.call(d3.axisLeft(y));
+          bottomG.call(d3.axisBottom(x))
 
           let corr_data = data.filter(d => filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
       
@@ -451,9 +470,13 @@
               .attr("y", y.bandwidth()/2 + 5)
               .text(d => d.correlation.toFixed(2))
 
-            // delete like from variables
+          let sorted =  corr_like.sort((a,b) => d3.descending(a.correlation, b.correlation))
+
+          console.log(sorted)
+
+          inputCorr.data(sorted).text(d => d.column_y.replace("_partner", "")).style("font-weight", "bold")
+
             // need to add legend!!
-            // also annotate with values
         }
 
         const inputDiv = d3.selectAll("h2.fill");
