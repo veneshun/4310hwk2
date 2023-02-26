@@ -119,7 +119,10 @@
         <h2>This chart shows that people who are </h2>
         <h2 class="fill"></h2>
       </div>
-      <h2><i>THINK</i> that the most important attribute in a partner is [INSERT HERE]</h2>
+      <div class="fill">
+      <h2><i>THINK</i> that the most important attribute in a partner is</h2>
+      <h2 id="top"></h2>
+    </div>
       
       
       <svg id="bubble" width="1000" , height="200"></svg>
@@ -164,7 +167,7 @@
       const requestData = async () => {
         let data = await d3.csv('clean_speeddating.csv', d3.autoType)
         
-        console.log(data);
+     
 
     // bubble plot work here
       
@@ -201,7 +204,7 @@
        updateHeat(filters); 
        updateText(filters);
 
-       console.log(filters)
+    //   console.log(filters)
 
 
        // update heatmap
@@ -217,10 +220,22 @@
            });
 
 
+           
+
+        // Dynamic Text for Bubble Chart
          const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
+         const inputTop = d3.select("h2#top");
+
+          let rating_sorted = filteredAttributes.sort((a, b) => a.rating - b.rating);
+
+          const highestRating = rating_sorted[rating_sorted.length - 1].rating; 
+
+          inputTop.data(rating_sorted)
+            .text(`${rating_sorted[rating_sorted.length - 1].attribute.replace("_important", "")}`)
+            .style("font-weight", "bold");
 
 
-         console.log(filteredAttributes)
+       //  console.log(filteredAttributes)
 
 
          const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
@@ -271,6 +286,11 @@
          .attr('text-anchor', 'middle')
          .attr('font-size', '11px')
          .attr('fill', 'black');
+
+
+  
+
+          //inputCorr.data(sorted).text(d => d.column_y.replace("_partner", "")).style("font-weight", "bold")
          })
  
 
@@ -472,7 +492,7 @@
 
           let sorted =  corr_like.sort((a,b) => d3.descending(a.correlation, b.correlation))
 
-          console.log(sorted)
+         // console.log(sorted)
 
           inputCorr.data(sorted).text(d => d.column_y.replace("_partner", "")).style("font-weight", "bold")
 
