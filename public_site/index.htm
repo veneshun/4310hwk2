@@ -7,8 +7,9 @@
     <style>
       body {
         margin: 1in;
-        font-family: "Avenir", sans-serif;
+        font-family: 'Courier New', Courier, monospace;
         background-color: #FFEAFD;
+        line-height: 0.5cm;
       }
 
       h1 {
@@ -20,6 +21,7 @@
       h2 {
         font-size: 16;
         font-weight: normal;
+        
       }
 
 
@@ -37,17 +39,15 @@
         display: inline-block;
         justify-content: center;
         margin-left: 1em;
+        padding: 1em;
       }
 
       div#filters {
-        border: solid black;
+        border: solid plum;
+        background-color:white;
         border-radius: 2%;
         padding: 1em;
         margin: 1em;
-      }
-
-      div#filters input[type="checkbox"]{
-        /* appearance: none; */
       }
 
       div#filters label{
@@ -65,6 +65,17 @@
         display: inline-block;
       }
 
+      .tip {
+        color:darkmagenta;
+        margin: 0em;
+        font-size: small;
+      }
+
+      .axis {
+        font-family: 'Courier New', Courier, monospace;
+
+      }
+
        
     </style>
 
@@ -78,6 +89,7 @@
     <h2>Sydney Bednar (sb844), Victoria Eshun (vee4), Noorejehan Umar (nu44)</h2>
     <div id="container">
     <div id="filters" class="child">
+      <p class="tip">**Select a filter to begin.**</p>
       <div id="gender">
         <h3>Gender</h3>
         <label>
@@ -116,11 +128,11 @@
     <div id="charts" class="child">
       <h1>What do people THINK they prefer in a partner?</h1>
       <div id="think-input" class="fill">
-        <h2>This chart shows that people who are </h2>
+        <h2>This bubble chart shows that people who are </h2>
         <h2 class="fill"></h2>
       </div>
       <div class="fill">
-      <h2><i>THINK</i> that the most important attribute in a partner is</h2>
+      <h2><i>THINK</i> that the most important attribute in a partner is </h2>
       <h2 class="top"></h2>
     </div>
       
@@ -128,7 +140,7 @@
       <svg id="bubble" width="1000" , height="200"></svg>
       <h1>What do people ACTUALLY prefer in a partner?</h1>
       <div id="actual-input" class="fill">
-        <h2>This chart shows that people who are</h2>
+        <h2>This correlation heatmap shows that people who are</h2>
         <h2 class="fill"></h2>
         
       </div>
@@ -210,7 +222,8 @@
         inputTop.style("visibility", "hidden")
         circles.selectAll('circle').remove();
         circles.selectAll('text').remove();
-        heatmap.selectAll('.heat').style("display", "none")
+        heatmap.selectAll('g.heatarea').remove();
+        heatmap.selectAll('g.axis').style("visibility", "hidden");
         return;
       }
   
@@ -323,29 +336,28 @@
 
     // heatmaps work here
         const heatmap = d3.select("svg#heatmap")
-        const width = heatmap.attr("width") - margin.left
+        const width = heatmap.attr("width") - margin.left - margin.right
         const height = heatmap.attr("height") - margin.top - margin.bottom
 
-        const attribs = ["attractive_partner", "sincere_partner", "funny_partner",
-          "ambition_partner", "intelligence_partner", "shared_interests_partner", "like"]
+        const attribs = ["attractive_partner", "sincere_partner", "intelligence_partner",
+          "funny_partner", "ambition_partner", "shared_interests_partner", "like"]
 
-        const noLike = ["attractive_partner", "sincere_partner", "funny_partner",
-          "ambition_partner", "intelligence_partner", "shared_interests_partner"]
+        const noLike = ["attractive_partner", "sincere_partner", "intelligence_partner", 
+        "funny_partner", "ambition_partner", "shared_interests_partner"]
         
         var x = d3.scaleBand()
           .range([0, width])
           .domain(noLike)
           .padding(0.01);
-        const bottomG = heatmap.append("g")
+        const bottomG = heatmap.append("g").attr("class", "axis")
           .attr("transform", `translate(${margin.left}, ${height})`)
-          
 
         var y = d3.scaleBand()
           .range([height, 0])
           .domain(["like"])
           .padding(0.01);
 
-        const leftG = heatmap.append("g")
+        const leftG = heatmap.append("g").attr("class", "axis")
           .attr("transform", `translate(${margin.left}, 0)`)
           
 
@@ -353,37 +365,23 @@
           .range(["white", "red"])
           .domain([0, 1])
 
-        const heatArea = heatmap.append("g")
+        const heatArea = heatmap.append("g").attr("class", "heatarea")
           .attr("transform", `translate(${margin.left}, 0)`)
 
         let corr = jz.arr.correlationMatrix(data, attribs)
 
         let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
 
-        // const rects = heatArea.selectAll("rect.heat").data(corr_like)
-        // const text = heatArea.selectAll("text.heat").data(corr_like)
+        const botAxis = d3.axisBottom()
 
-        // // default??
-        // rects.enter().append("rect")
-        //   .attr("class", "heat")
-        //   .attr("x", d => x(d.column_y))
-        //   .attr("y", y("like"))
-        //   .attr("width", x.bandwidth())
-        //   .attr("height", y.bandwidth())
-        //   .style("fill", d => myColor(d.correlation))
-
-        // text.enter().append("text").attr("class", "heat")
-        //   .attr("x", d => x(d.column_y) + 40)
-        //   .attr("y", y.bandwidth() / 2 + 5)
-        //   .text(d => d.correlation.toFixed(2))
-
-        // const inputCorr = d3.select("h2.corr").data(sorted);
 
         function updateHeat(filters){
-          
 
+          // make axes visible
+          heatmap.selectAll('g.axis').style("visibility", "visible");
+        
           leftG.call(d3.axisLeft(y));
-          bottomG.call(d3.axisBottom(x))
+          bottomG.call(botAxis.scale(x))
 
           let corr_data = data.filter(d => filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
       
@@ -397,7 +395,7 @@
             .range(["white", "red"])
             .domain([0,1])
 
-          let heatArea = heatmap.append("g")
+          let heatArea = heatmap.append("g").attr("class", "heatarea")
             .attr("transform", `translate(${margin.left}, 0)`)
 
           const rects = heatArea.selectAll("rect.heat").data(corr_like) 
@@ -434,9 +432,6 @@
           }
           updateTopCorr(topCorrelation);
 
-          
-
-            // need to add legend!!
         }
 
         const inputDiv = d3.selectAll("h2.fill");
@@ -444,7 +439,9 @@
         // trying to add a dynamically changing text based on filters
         function updateText(filters){
 
-          inputDiv.text(filters)
+          console.log(filters.slice())
+
+          inputDiv.text(filters.slice())
                   .attr("class","select")
                   .style("font-weight", "bold");
 
@@ -460,7 +457,7 @@
 
   
 
-         // scatterplots work here **might have to do histograms
+        // scatterplots work here **might have to do histograms
         // let scatGroup = d3.select("div#scatter")
 
         // let attributes = ['ambition_partner', 'attractive_partner', 'funny_partner', 
