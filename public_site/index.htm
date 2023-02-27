@@ -270,7 +270,7 @@
             circles.selectAll('circle').remove();
             circles.selectAll('text').remove();
             heatmap.selectAll('rect').remove();
-            heatmap.selectAll('text').remove();
+            heatmap.selectAll('text.heat').remove();
             heatmap.selectAll('g.axis').style("visibility", "hidden");
             return;
           }
@@ -410,6 +410,7 @@
 
           // make axes visible
           heatmap.selectAll('g.axis').style("visibility", "visible");
+          
         
           leftG.call(d3.axisLeft(y));
           bottomG.call(botAxis.scale(x).tickFormat(d => d.replace("_partner", "")))
