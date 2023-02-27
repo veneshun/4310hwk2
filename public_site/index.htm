@@ -135,7 +135,7 @@
 
       <div class="fill">
         <h2><i>ACTUALLY</i> like a partner because of the attribute</h2>
-      <h2 id="corr"></h2>
+      <h2 class="corr"></h2>
       </div>
       
 
@@ -206,11 +206,16 @@
 
 
        if (filters.length === 0) {
+        console.log("array empty")
     
     circles.selectAll('circle').remove();
     circles.selectAll('text').remove();
+    heatArea.selectAll("rect.heat").remove();
     return;
+
+    // if(filters.length === 0){console.log("array empty")}
   }
+  else if (filters.length >= 1){updateTopRated(topRating, filters)}
 
 
     //   console.log(filters)
@@ -290,23 +295,205 @@
 
 
    
-         const inputTop = d3.select("h2#top");
+        // const inputTop = d3.select("h2#top");
 
         let rating_sorted = filteredAttributes.sort((a, b) => a.rating - b.rating);
 
         const highestRating = rating_sorted[rating_sorted.length - 1].rating; 
 
-        inputTop.data(rating_sorted)
-          .text(`${rating_sorted[rating_sorted.length - 1].attribute.replace("_important", "")}`)
-          .style("font-weight", "bold");
+        // inputTop.data(rating_sorted)
+        //   .text(`${rating_sorted[rating_sorted.length - 1].attribute.replace("_important", "")}`)
+        //   .style("font-weight", "bold");
 
+        console.log(rating_sorted)
 
+       if (rating_sorted.length === 6){var topRating = rating_sorted[rating_sorted.length - 1].attribute.replace("_important", "")}
+
+       console.log(topRating)
+
+        // if(filters.length === 0){console.log("array empty")}
+        console.log(filters)
+
+        updateTopRated(topRating, filters)
+
+        // updateTopRated(topRating, filters)
           //inputCorr.data(sorted).text(d => d.column_y.replace("_partner", "")).style("font-weight", "bold")
          })
+
+        const inputTop = d3.select("h2#top");
+
+        function updateTopRated(topRating, filters){
+            console.log(filters.length)
+            inputTop.text(topRating).style("font-weight", "bold")
+        }
  
 
 
-    // scatterplots work here **might have to do histograms
+   
+        
+
+    // heatmaps work here
+        const heatmap = d3.select("svg#heatmap")
+        const width = heatmap.attr("width") - margin.left
+        const height = heatmap.attr("height") - margin.top - margin.bottom
+
+        const attribs = ["attractive_partner", "sincere_partner", "funny_partner",
+          "ambition_partner", "intelligence_partner", "shared_interests_partner", "like"]
+
+        const noLike = ["attractive_partner", "sincere_partner", "funny_partner",
+          "ambition_partner", "intelligence_partner", "shared_interests_partner"]
+        
+        var x = d3.scaleBand()
+          .range([0, width])
+          .domain(noLike)
+          .padding(0.01);
+        const bottomG = heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, ${height})`)
+          
+
+        var y = d3.scaleBand()
+          .range([height, 0])
+          .domain(["like"])
+          .padding(0.01);
+
+        const leftG = heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, 0)`)
+          
+
+        var myColor = d3.scaleLinear()
+          .range(["white", "red"])
+          .domain([0, 1])
+
+        let heatArea = heatmap.append("g")
+          .attr("transform", `translate(${margin.left}, 0)`)
+
+        let corr = jz.arr.correlationMatrix(data, attribs)
+
+        let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
+
+        const rects = heatArea.selectAll("rect.heat").data(corr_like)
+        const text = heatArea.selectAll("text.heat").data(corr_like)
+
+        // // default??
+        // rects.enter().append("rect")
+        //   .attr("class", "heat")
+        //   .attr("x", d => x(d.column_y))
+        //   .attr("y", y("like"))
+        //   .attr("width", x.bandwidth())
+        //   .attr("height", y.bandwidth())
+        //   .style("fill", d => myColor(d.correlation))
+
+        // text.enter().append("text").attr("class", "heat")
+        //   .attr("x", d => x(d.column_y) + 40)
+        //   .attr("y", y.bandwidth() / 2 + 5)
+        //   .text(d => d.correlation.toFixed(2))
+
+        // const inputCorr = d3.select("h2.corr").data(sorted);
+
+        function updateHeat(filters){
+
+          leftG.call(d3.axisLeft(y));
+          bottomG.call(d3.axisBottom(x))
+
+          let corr_data = data.filter(d => filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
+      
+          let corr = jz.arr.correlationMatrix(corr_data, attribs)
+
+          let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
+
+          let corr_extent = d3.extent(corr_like, d => d.correlation)
+          // console.log(corr_extent)
+          var myColor = d3.scaleLinear()
+            .range(["white", "red"])
+            .domain([0,1])
+
+          let heatArea = heatmap.append("g")
+            .attr("transform", `translate(${margin.left}, 0)`)
+
+          const rects = heatArea.selectAll("rect.heat").data(corr_like) 
+          const text = heatArea.selectAll("text.heat").data(corr_like)
+
+          rects.exit().remove();
+          
+          rects.enter().append("rect")
+            .attr("class", "heat")
+            .attr("x", d => x(d.column_y))
+            .attr("y", y("like"))
+            .attr("width", x.bandwidth())
+            .attr("height", y.bandwidth())
+            .style("fill", d => myColor(d.correlation))  
+
+
+          text.exit().remove();
+
+          text.enter().append("text").attr("class", "heat")
+              .attr("x", d => x(d.column_y) + 40)
+              .attr("y", y.bandwidth()/2 + 5)
+              .text(d => d.correlation.toFixed(2))
+
+              
+
+          let sorted =  corr_like.sort((a,b) => d3.descending(a.correlation, b.correlation))
+
+          console.log(sorted[0])
+
+          if(filters.length >= 1){
+            var topCorrelation = sorted[0].column_y.replace("_partner", "")
+
+            // console.log(topCorrelation)
+          }
+          updateTopCorr(topCorrelation);
+
+          //  console.log(topCorrelation)
+
+            // inputCorr.data(sorted).text(d => d.column_y.replace("_partner", "")).style("font-weight", "bold")
+
+            // const inputCorr = d3.select("h2.corr");
+
+            // if(topCorrelation){
+            //   if(filters.length >= 1){
+            //   console.log(topCorrelation)
+            //   inputCorr.data(sorted).text(topCorrelation).style("font-weight", "bold")}
+            //   return;
+
+            // }
+
+            // function updateTopCorr(topCorrelation){
+            //   inputCorr.data(sorted).text(topCorrelation).style("font-weight", "bold")}
+            // }
+            
+
+            //inputCorr.selectAll('text').remove()
+
+
+
+            
+
+              // need to add legend!!
+        }
+
+        const inputDiv = d3.selectAll("h2.fill");
+
+        // trying to add a dynamically changing text based on filters
+        function updateText(filters){
+
+          inputDiv.text(filters)
+                  .attr("class","select")
+                  .style("font-weight", "bold");
+
+        }
+
+        const inputCorr = d3.select("h2.corr");
+
+        function updateTopCorr(topCorrelation){
+            inputCorr.text(topCorrelation).style("font-weight", "bold")
+        }
+
+       
+
+  
+
+         // scatterplots work here **might have to do histograms
         // let scatGroup = d3.select("div#scatter")
 
         // let attributes = ['ambition_partner', 'attractive_partner', 'funny_partner', 
@@ -400,130 +587,6 @@
                 
         // } 
         // drawScatter();
-        
-
-    // heatmaps work here
-        const heatmap = d3.select("svg#heatmap")
-        const width = heatmap.attr("width") - margin.left
-        const height = heatmap.attr("height") - margin.top - margin.bottom
-
-        const attribs = ["attractive_partner", "sincere_partner", "funny_partner",
-          "ambition_partner", "intelligence_partner", "shared_interests_partner", "like"]
-
-        const noLike = ["attractive_partner", "sincere_partner", "funny_partner",
-          "ambition_partner", "intelligence_partner", "shared_interests_partner"]
-        
-        var x = d3.scaleBand()
-          .range([0, width])
-          .domain(noLike)
-          .padding(0.01);
-        const bottomG = heatmap.append("g")
-          .attr("transform", `translate(${margin.left}, ${height})`)
-          
-
-        var y = d3.scaleBand()
-          .range([height, 0])
-          .domain(["like"])
-          .padding(0.01);
-
-        const leftG = heatmap.append("g")
-          .attr("transform", `translate(${margin.left}, 0)`)
-          
-
-        var myColor = d3.scaleLinear()
-          .range(["white", "red"])
-          .domain([0, 1])
-
-        let heatArea = heatmap.append("g")
-          .attr("transform", `translate(${margin.left}, 0)`)
-
-        let corr = jz.arr.correlationMatrix(data, attribs)
-
-        let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
-
-        const rects = heatArea.selectAll("rect.heat").data(corr_like)
-        const text = heatArea.selectAll("text.heat").data(corr_like)
-
-        // // default??
-        // rects.enter().append("rect")
-        //   .attr("class", "heat")
-        //   .attr("x", d => x(d.column_y))
-        //   .attr("y", y("like"))
-        //   .attr("width", x.bandwidth())
-        //   .attr("height", y.bandwidth())
-        //   .style("fill", d => myColor(d.correlation))
-
-        // text.enter().append("text").attr("class", "heat")
-        //   .attr("x", d => x(d.column_y) + 40)
-        //   .attr("y", y.bandwidth() / 2 + 5)
-        //   .text(d => d.correlation.toFixed(2))
-
-        const inputCorr = d3.select("h2#corr");
-
-        function updateHeat(filters){
-
-          leftG.call(d3.axisLeft(y));
-          bottomG.call(d3.axisBottom(x))
-
-          let corr_data = data.filter(d => filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
-      
-          let corr = jz.arr.correlationMatrix(corr_data, attribs)
-
-          let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
-
-          let corr_extent = d3.extent(corr_like, d => d.correlation)
-          // console.log(corr_extent)
-          var myColor = d3.scaleLinear()
-            .range(["white", "red"])
-            .domain([0,1])
-
-          let heatArea = heatmap.append("g")
-            .attr("transform", `translate(${margin.left}, 0)`)
-
-          const rects = heatArea.selectAll("rect.heat").data(corr_like) 
-          const text = heatArea.selectAll("text.heat").data(corr_like)
-
-          rects.exit().remove();
-          
-          rects.enter().append("rect")
-            .attr("class", "heat")
-            .attr("x", d => x(d.column_y))
-            .attr("y", y("like"))
-            .attr("width", x.bandwidth())
-            .attr("height", y.bandwidth())
-            .style("fill", d => myColor(d.correlation))  
-
-
-          text.exit().remove();
-
-          text.enter().append("text").attr("class", "heat")
-              .attr("x", d => x(d.column_y) + 40)
-              .attr("y", y.bandwidth()/2 + 5)
-              .text(d => d.correlation.toFixed(2))
-
-          let sorted =  corr_like.sort((a,b) => d3.descending(a.correlation, b.correlation))
-
-         // console.log(sorted)
-
-          inputCorr.data(sorted).text(d => d.column_y.replace("_partner", "")).style("font-weight", "bold")
-
-            // need to add legend!!
-        }
-
-        const inputDiv = d3.selectAll("h2.fill");
-
-        // trying to add a dynamically changing text based on filters
-        function updateText(filters){
-
-          inputDiv.text(filters)
-                  .attr("class","select")
-                  .style("font-weight", "bold");
-
-        }
-
-  
-
-
       
 
    
