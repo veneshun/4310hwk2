@@ -9,7 +9,7 @@
         margin: 1in;
         font-family: 'Courier New', Courier, monospace;
         background-color: #FFEAFD;
-        line-height: 0.5cm;
+        /* line-height: 0.5cm; */
       }
 
       h1 {
@@ -21,7 +21,6 @@
       h2 {
         font-size: 16;
         font-weight: normal;
-        
       }
 
 
@@ -36,18 +35,16 @@
       }
 
       div.child {
-        display: inline-block;
-        justify-content: center;
         margin-left: 1em;
-        padding: 1em;
+        padding-top: 1em;
+        padding-left: 1em;
       }
 
       div#filters {
         border: solid plum;
         background-color:white;
         border-radius: 2%;
-        padding: 1em;
-        margin: 1em;
+        margin-top: 1em;
       }
 
       div#filters label{
@@ -59,10 +56,19 @@
 
       div#container {
         display: flex;
+        align-items: stretch;
       }
 
       div.fill h2{
         display: inline-block;
+      }
+
+      .text-graph {
+        border: solid plum;
+        background-color:white;
+        border-radius: 2%;
+        padding: 1em;
+        width: 900px;
       }
 
       .tip {
@@ -74,6 +80,10 @@
       .axis {
         font-family: 'Courier New', Courier, monospace;
 
+      }
+
+      svg {
+        margin-top: 1em;
       }
 
        
@@ -88,74 +98,79 @@
     <h1>Homework 2</h1>
     <h2>Sydney Bednar (sb844), Victoria Eshun (vee4), Noorejehan Umar (nu44)</h2>
     <div id="container">
-    <div id="filters" class="child">
-      <p class="tip">**Select a filter to begin.**</p>
-      <div id="gender">
-        <h3>Gender</h3>
-        <label>
-          <input type="checkbox" id="female">Female</input>
-        </label>
+      <div id="filters" class="child">
+        <p class="tip">**Select a filter to begin.**</p>
+        <div id="gender">
+          <h3>Gender</h3>
+          <label>
+            <input type="checkbox" id="female">Female</input>
+          </label>
+          
+          <label>
+            <input type="checkbox" id="male">Male</input>
+          </label>
+          
+        </div>
+        <div id="race">
+          <h3>Race</h3>
+          <label>
+            <input type="checkbox" id="European">European/Caucasian-American</input>
+          </label>
         
-        <label>
-          <input type="checkbox" id="male">Male</input>
-        </label>
+          <label>
+            <input type="checkbox" id="Asian">Asian/Pacific Islander/Asian-American </input>
+          </label>
+          
+          <label>
+            <input type="checkbox" id="Latino">Latino/Hispanic American</input>
+          </label>
+          
+          <label>
+            <input type="checkbox" id="Black">Black/African American</input>
+          </label>
         
+          <label>
+            <input type="checkbox" id="Other">Other</input>
+          </label>
+          
+        </div>
       </div>
-      <div id="race">
-        <h3>Race</h3>
-        <label>
-          <input type="checkbox" id="European">European/Caucasian-American</input>
-        </label>
-       
-        <label>
-          <input type="checkbox" id="Asian">Asian/Pacific Islander/Asian-American </input>
-        </label>
+      <div id="charts" class="child">
+        <h1 style="margin-top: 0em">What do people THINK they prefer in a partner?</h1>
+        <div class="text-graph">
         
-        <label>
-          <input type="checkbox" id="Latino">Latino/Hispanic American</input>
-        </label>
+          <div id="think-input" class="fill">
+            <h2>This bubble chart shows that people who are </h2>
+            <h2 class="fill"></h2>
+          </div>
+          <div class="fill">
+            <h2><i>THINK</i> that the most important attribute in a partner is </h2>
+            <h2 class="top"></h2>
+          </div>
         
-        <label>
-          <input type="checkbox" id="Black">Black/African American</input>
-        </label>
-       
-        <label>
-          <input type="checkbox" id="Other">Other</input>
-        </label>
-        
-      </div>
-    </div>
-    <div id="charts" class="child">
-      <h1>What do people THINK they prefer in a partner?</h1>
-      <div id="think-input" class="fill">
-        <h2>This bubble chart shows that people who are </h2>
-        <h2 class="fill"></h2>
-      </div>
-      <div class="fill">
-      <h2><i>THINK</i> that the most important attribute in a partner is </h2>
-      <h2 class="top"></h2>
-    </div>
-      
-      
-      <svg id="bubble" width="1000" , height="200"></svg>
-      <h1>What do people ACTUALLY prefer in a partner?</h1>
-      <div id="actual-input" class="fill">
-        <h2>This correlation heatmap shows that people who are</h2>
-        <h2 class="fill"></h2>
-        
-      </div>
+          <svg id="bubble" width="1000" , height="200"></svg>
+        </div>
 
-      <div class="fill">
-        <h2><i>ACTUALLY</i> like a partner because of the attribute</h2>
-      <h2 class="corr"></h2>
-      </div>
-      
+        <h1>What do people ACTUALLY prefer in a partner?</h1>
+        <div class="text-graph">
+        
+          <div id="actual-input" class="fill">
+            <h2>This correlation heatmap shows that people who are</h2>
+            <h2 class="fill"></h2>
+            
+          </div>
 
+          <div class="fill">
+            <h2><i>ACTUALLY</i> like a partner because of the attribute</h2>
+            <h2 class="corr"></h2>
+          </div>
+        
+        
       
-      
-    
-      <svg id="heatmap" width="800" , height="200"></svg>
-    </div>
+          <svg id="heatmap" width="800" , height="200"></svg>
+
+        </div>
+      </div>
     </div>
     
     <div id="scatter"></g>
@@ -381,7 +396,7 @@
           heatmap.selectAll('g.axis').style("visibility", "visible");
         
           leftG.call(d3.axisLeft(y));
-          bottomG.call(botAxis.scale(x))
+          bottomG.call(botAxis.scale(x).tickFormat(d => d.replace("_partner", "")))
 
           let corr_data = data.filter(d => filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
       
@@ -390,10 +405,9 @@
           let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
 
           let corr_extent = d3.extent(corr_like, d => d.correlation)
-          // console.log(corr_extent)
-          var myColor = d3.scaleLinear()
-            .range(["white", "red"])
-            .domain([0,1])
+          
+          // don't need this but could
+          myColor.domain(corr_extent)
 
           let heatArea = heatmap.append("g").attr("class", "heatarea")
             .attr("transform", `translate(${margin.left}, 0)`)
@@ -439,9 +453,24 @@
         // trying to add a dynamically changing text based on filters
         function updateText(filters){
 
-          console.log(filters.slice())
+          text = ""
 
-          inputDiv.text(filters.slice())
+          filters.forEach((f,i) => {
+
+            let f_update= f.charAt(0).toUpperCase() + f.slice(1)
+
+            if(i==filters.length-1){
+              text = text + f_update
+            }
+            else{
+              text = text + f_update + ", "
+            }
+            
+          })
+
+          console.log(text)
+
+          inputDiv.text(text)
                   .attr("class","select")
                   .style("font-weight", "bold");
 
