@@ -230,160 +230,139 @@
      
 
         // bubble plot work here
+
+        d3.selectAll("input").on("change", function updateChart()  {
       
-       
+          d3.select(this).style("font-weight", "bold")
 
-       d3.selectAll("input").on("change", function updateChart()  {
-      
-        d3.select(this).style("font-weight", "bold")
+          // initialize filter array
+          var filters = []
 
-        var filters = []
+          if(d3.select("#female").property("checked")){
+            filters.push("female")
+          }
+          if(d3.select("#male").property("checked")){
+            filters.push("male")
+          }
+          if(d3.select("#European").property("checked")){
+            filters.push("European")
+          }
+          if(d3.select("#Asian").property("checked")){
+            filters.push("Asian")
+          }
+          if(d3.select("#Latino").property("checked")){
+            filters.push("Latino")
+          }
+          if(d3.select("#Black").property("checked")){
+            filters.push("Black")
+          }
+          if(d3.select("#Other").property("checked")){
+            filters.push("Other")
+          }
 
-        if(d3.select("#female").property("checked")){
-          filters.push("female")
-        }
-        if(d3.select("#male").property("checked")){
-          filters.push("male")
-        }
-        if(d3.select("#European").property("checked")){
-          filters.push("European")
-        }
-        if(d3.select("#Asian").property("checked")){
-          filters.push("Asian")
-        }
-        if(d3.select("#Latino").property("checked")){
-          filters.push("Latino")
-        }
-        if(d3.select("#Black").property("checked")){
-          filters.push("Black")
-        }
-        if(d3.select("#Other").property("checked")){
-          filters.push("Other")
-        }
-
-        updateHeat(filters); 
-        updateText(filters);
+          updateHeat(filters); 
+          updateText(filters);
 
 
-        if (filters.length === 0) {
-          console.log(filters.length)
-          inputTop.style("visibility", "hidden")
-          circles.selectAll('circle').remove();
-          circles.selectAll('text').remove();
-          heatmap.selectAll('rect').remove();
-          heatmap.selectAll('text').remove();
-          heatmap.selectAll('g.axis').style("visibility", "hidden");
-          return;
-        }
-  
+          if (filters.length === 0) {
+            console.log(filters.length)
+            inputTop.style("visibility", "hidden")
+            circles.selectAll('circle').remove();
+            circles.selectAll('text').remove();
+            heatmap.selectAll('rect').remove();
+            heatmap.selectAll('text').remove();
+            heatmap.selectAll('g.axis').style("visibility", "hidden");
+            return;
+          }
+    
 
+          // filter dataset according to selected filters
+          var selectedValue = data.filter(d=> filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
+          const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
+          const attributeData = attributeNames.map(attribute => {
+            const ratings = selectedValue.map(d => +d[attribute]);
+            const averageRating = d3.mean(ratings);
+            return { attribute, rating: averageRating };
+          });
 
-    //   console.log(filters)
-
-
-       // update heatmap
-
+          const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
         
-           var selectedValue = data.filter(d=> filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
-           console.log(selectedValue)
-           const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
-           const attributeData = attributeNames.map(attribute => {
-           const ratings = selectedValue.map(d => +d[attribute]);
-           const averageRating = d3.mean(ratings);
-           return { attribute, rating: averageRating };
-           });
+          // scales for bubble chart
+          const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
+          const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
+          const colorScale = d3.scaleOrdinal().range(["#7E0080", "#9B51B4", "#DF6FA0", 
+          "#EF224B", "#C20232", "#6E0E0A"]);
 
 
-           
-
-   
-         const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
-        
+          // initialize and update circles and corresponding text 
+          const circlesUpdated = circles.selectAll('circle').data(filteredAttributes);
+          const textUpdated = circles.selectAll('text').data(filteredAttributes);
 
 
-       //  console.log(filteredAttributes)
+          circlesUpdated
+          .attr('cx', (d, i) => (i * 140))
+          .attr("cy", bHeight/2)
+          .attr('r', d => sizeScale(d.rating))
+          .attr('fill', d => colorScale(d.attribute));
 
 
-         const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
-         const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
-         const colorScale = d3.scaleOrdinal().range(["#7E0080", "#9B51B4", "#DF6FA0", 
-         "#EF224B", "#C20232", "#6E0E0A"]);
+          textUpdated
+          .text(d => d.attribute.replace('_important', ''))
+          .attr('x', (d, i) => (i * 140))
+          .attr('y', bHeight/2 - 80)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '11px')
+          .attr('fill', 'black');
 
 
-         const circlesUpdated = circles.selectAll('circle').data(filteredAttributes);
-         const textUpdated = circles.selectAll('text').data(filteredAttributes);
+          circlesUpdated.exit().remove();
+          textUpdated.exit().remove();
 
 
-         circlesUpdated
-         .attr('cx', (d, i) => (i * 140))
-         .attr("cy", bHeight/2)
-         .attr('r', d => sizeScale(d.rating))
-         .attr('fill', d => colorScale(d.attribute));
+          circlesUpdated
+          .enter()
+          .append('circle')
+          .attr('cx', (d, i) => (i * 140))
+          .attr("cy", bHeight/2)
+          .attr('r', d => sizeScale(d.rating))
+          .attr('fill', d => colorScale(d.attribute));
 
 
-         textUpdated
-         .text(d => d.attribute.replace('_important', ''))
-         .attr('x', (d, i) => (i * 140))
-         .attr('y', bHeight/2 - 80)
-         .attr('text-anchor', 'middle')
-         .attr('font-size', '11px')
-         .attr('fill', 'black');
+          textUpdated
+          .enter()
+          .append('text')
+          .text(d => d.attribute.replace('_important', ''))
+          .attr('x', (d, i) => (i * 140))
+          .attr('y', bHeight/2 - 80)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '11px')
+          .attr('fill', 'black');
 
 
-         circlesUpdated.exit().remove();
-         textUpdated.exit().remove();
+          // rank attributes according to ratings and take out attribute with highest rating 
+          var rating_sorted = filteredAttributes.sort((a, b) => a.rating - b.rating);
 
+          var highestRating = []
+          
+          highestRating.push(rating_sorted[rating_sorted.length - 1])
 
-         circlesUpdated
-         .enter()
-         .append('circle')
-         .attr('cx', (d, i) => (i * 140))
-         .attr("cy", bHeight/2)
-         .attr('r', d => sizeScale(d.rating))
-         .attr('fill', d => colorScale(d.attribute));
-
-
-         textUpdated
-         .enter()
-         .append('text')
-         .text(d => d.attribute.replace('_important', ''))
-         .attr('x', (d, i) => (i * 140))
-         .attr('y', bHeight/2 - 80)
-         .attr('text-anchor', 'middle')
-         .attr('font-size', '11px')
-         .attr('fill', 'black');
-
-
-   
-        // const inputTop = d3.select("h2#top");
-
-        var rating_sorted = filteredAttributes.sort((a, b) => a.rating - b.rating);
-
-        var highestRating = []
-        
-
-        highestRating.push(rating_sorted[rating_sorted.length - 1])
-
-
-        if(highestRating.length >= 1){
-          var topRating = highestRating[0].attribute.replace("_important", "")}
-        
-      
-        updateTopRated(topRating, filters)
-      })
+          if(highestRating.length >= 1){
+            var topRating = highestRating[0].attribute.replace("_important", "")
+          }
+          
+          updateTopRated(topRating, filters)
+        })
 
         const inputTop = d3.select("h2.top");
 
+        // function to dynamically change text according to highest rated attribute
         function updateTopRated(topRating, filters){
-            inputTop.text(topRating).attr("class", "toptext").style("font-weight", "bold").style("visibility", "visible")}
+            inputTop.text(topRating).attr("class", "toptext").style("font-weight", "bold").style("visibility", "visible")
+        }
         
  
 
-
-   
-        
-
-    // heatmaps work here
+        // heatmaps work here
         const heatmap = d3.select("svg#heatmap")
         const width = heatmap.attr("width") - margin.left - margin.right
         const height = heatmap.attr("height") - margin.top - margin.bottom
@@ -393,11 +372,13 @@
 
         const noLike = ["attractive_partner", "sincere_partner", "intelligence_partner", 
         "funny_partner", "ambition_partner", "shared_interests_partner"]
-        
+
+        // initializing heatmap axes      
         var x = d3.scaleBand()
           .range([0, width])
           .domain(noLike)
           .padding(0.01);
+
         const bottomG = heatmap.append("g").attr("class", "axis")
           .attr("transform", `translate(${margin.left}, ${height})`)
 
@@ -414,6 +395,7 @@
           .range(["white", "red"])
           .domain([0, 1])
 
+        // initializing heatmap andd correlation matrix
         const heatArea = heatmap.append("g").attr("class", "heatarea")
           .attr("transform", `translate(${margin.left}, 0)`)
 
@@ -432,6 +414,8 @@
           leftG.call(d3.axisLeft(y));
           bottomG.call(botAxis.scale(x).tickFormat(d => d.replace("_partner", "")))
 
+          // create array with correlation data for heatmap
+
           let corr_data = data.filter(d => filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
       
           let corr = jz.arr.correlationMatrix(corr_data, attribs)
@@ -440,10 +424,10 @@
 
           let corr_extent = d3.extent(corr_like, d => d.correlation)
           
-          // don't need this but could
           myColor.domain(corr_extent)
 
 
+          // creating heatmap rectangles and text 
           const rects = heatArea.selectAll("rect.heat").data(corr_like) 
           const text = heatArea.selectAll("text.heat").data(corr_like)
 
@@ -467,6 +451,7 @@
 
 
 
+          // getting attribute with highest correlation 
           var sorted =  corr_like.sort((a,b) => d3.descending(a.correlation, b.correlation))
 
           console.log(sorted[0])
@@ -481,7 +466,7 @@
 
         const inputDiv = d3.selectAll("h2.fill");
 
-        // trying to add a dynamically changing text based on filters
+        // adding dynamically changing text based on filters
         function updateText(filters){
 
           text = ""
@@ -513,107 +498,7 @@
             inputCorr.text(topCorrelation).style("font-weight", "bold")
         }
 
-       
-
   
-
-        // scatterplots work here **might have to do histograms
-        // let scatGroup = d3.select("div#scatter")
-
-        // let attributes = ['ambition_partner', 'attractive_partner', 'funny_partner', 
-        // 'intelligence_partner', 'shared_interests_partner', 'sincere_partner']
-
-        // const sScales = {
-        //   "like": d3.scaleLinear().domain(d3.extent(data, d => d['like'])),
-        //   "attr_important": d3.scaleLinear().domain([0, 10]),
-        //   "attr_partner": d3.scaleLinear()
-        // };
-
-
-        // // add an svg for each attribute
-        // attributes.forEach( (attr) => {
-
-        //   let svg = scatGroup.append("svg")
-        //                     .attr("class", attr)
-        //                     .attr("width", 300)
-        //                     .attr("height", 300)
-
-        //   // drawScatter(svg, attr);
-
-        // });
-
-        // function jitter(min, max) {
-        //   return (Math.random() * (max - min) + min)
-        // };
-
-        // // function to draw scatterplots
-        // function drawScatter(svg, attr) {
-        //   let chartWidth = svg.attr("width") - margin.left - margin.right;
-        //   let chartHeight = svg.attr("height") - margin.top - margin.bottom;
-
-        //   let annotations = svg.append("g").attr("class", "annotations");
-
-
-          
-
-        //   let xScale = sScales['attr_partner'].copy().domain(d3.extent(data, d => d[attr])).range([0, chartWidth])
-        //   let yScale = sScales['like'].copy().range([chartHeight, 0])
-
-        //   let bottomGridlines = d3.axisBottom(xScale).tickSize(-chartHeight)
-        //     .tickFormat("")
-
-        //   let leftAxis = d3.axisLeft(yScale);
-        //   let bottomAxis = d3.axisBottom(xScale);
-
-        //   annotations.append("g")
-        //     .attr("class", "x axis")
-        //     .attr("transform", `translate(${margin.left},${chartHeight + margin.top})`)
-        //     .call(bottomAxis);
-
-        //   annotations.append("g")
-        //     .attr("class", "y axis")
-        //     .attr("transform", `translate(${margin.left},${margin.top})`)
-        //     .call(leftAxis);
-
-        //   annotations.append("g")
-        //     .attr("class", "x gridlines")
-        //     .attr("transform", `translate(${margin.left}, ${chartHeight + margin.top})`)
-        //     .call(bottomGridlines);
-
-
-        //   console.log(attr)
-
-        //   let chartArea = svg.append("g")
-        //                      .classed(attr, true)
-        //                      .attr("translate", `translate(${margin.left}, ${margin.top})`)
-
-
-        //   chartArea.append("g").selectAll(`circles.${attr}`)
-        //            .data(data)
-        //            .join("circle")
-        //            .attr("class", attr)
-        //            .attr("id", d => d['like'])
-        //            .attr("cx", d => xScale(d[attr])+jitter(-4,4))
-        //            .attr("cy", d => yScale(d['like'])+ jitter(-4, 4))
-        //            .attr("r", 2)
-        //            .attr("transform", `translate(${margin.left},${margin.top})`)
-          
-        //   annotations.append("text").text(attr).attr("x", -chartHeight/2)
-        //     .attr("y", 20)
-        //     .attr("text-anchor", "middle")
-        //     .style("font-size", "16px")
-        //     .attr("transform", "rotate(-90)")
-          
-        //   annotations.append("text").text("like").attr("x", chartWidth/2 + margin.left)
-        //     .attr("y", chartHeight + margin.top + margin.bottom -5)
-        //     .attr("text-anchor", "middle")
-        //     .style("font-size", "16px")
-                
-        // } 
-        // drawScatter();
-      
-
-   
 
       }
       requestData();
