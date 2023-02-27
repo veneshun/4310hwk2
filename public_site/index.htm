@@ -40,11 +40,15 @@
         padding-left: 1em;
       }
 
-      .title {
+      div#full{
         width: 1250px;
       }
 
-      .title p {
+      div.title {
+        width: 100%;
+      }
+
+      div.title p {
         margin-left: 1em;
       }
 
@@ -116,6 +120,7 @@
     <h1>Homework 2</h1>
     <h2>Sydney Bednar (sb844), Victoria Eshun (vee4), Noorejehan Umar (nu44)</h2>
 
+    <div id="full">
     <div class="title">
       <div id="htext"><h1>Speed Dating</h1></div>
     
@@ -201,7 +206,7 @@
       </div>
     </div>
     
-    <div id="scatter"></g>
+    </div>
     <script>
       const bubble = d3.select("svg#bubble")
       const bWidth = bubble.attr("width")
