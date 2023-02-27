@@ -229,7 +229,7 @@
         
      
 
-    // bubble plot work here
+        // bubble plot work here
       
        
 
@@ -239,41 +239,42 @@
 
         var filters = []
 
-       if(d3.select("#female").property("checked")){
-         filters.push("female")
-       }
-       if(d3.select("#male").property("checked")){
-         filters.push("male")
-       }
-       if(d3.select("#European").property("checked")){
-         filters.push("European")
-       }
-       if(d3.select("#Asian").property("checked")){
-         filters.push("Asian")
-       }
-       if(d3.select("#Latino").property("checked")){
-         filters.push("Latino")
-       }
-       if(d3.select("#Black").property("checked")){
-         filters.push("Black")
-       }
-       if(d3.select("#Other").property("checked")){
-         filters.push("Other")
-       }
+        if(d3.select("#female").property("checked")){
+          filters.push("female")
+        }
+        if(d3.select("#male").property("checked")){
+          filters.push("male")
+        }
+        if(d3.select("#European").property("checked")){
+          filters.push("European")
+        }
+        if(d3.select("#Asian").property("checked")){
+          filters.push("Asian")
+        }
+        if(d3.select("#Latino").property("checked")){
+          filters.push("Latino")
+        }
+        if(d3.select("#Black").property("checked")){
+          filters.push("Black")
+        }
+        if(d3.select("#Other").property("checked")){
+          filters.push("Other")
+        }
 
-       updateHeat(filters); 
-       updateText(filters);
+        updateHeat(filters); 
+        updateText(filters);
 
 
-       if (filters.length === 0) {
-        console.log(filters.length)
-        inputTop.style("visibility", "hidden")
-        circles.selectAll('circle').remove();
-        circles.selectAll('text').remove();
-        heatmap.selectAll('g.heatarea').remove();
-        heatmap.selectAll('g.axis').style("visibility", "hidden");
-        return;
-      }
+        if (filters.length === 0) {
+          console.log(filters.length)
+          inputTop.style("visibility", "hidden")
+          circles.selectAll('circle').remove();
+          circles.selectAll('text').remove();
+          heatmap.selectAll('rect').remove();
+          heatmap.selectAll('text').remove();
+          heatmap.selectAll('g.axis').style("visibility", "hidden");
+          return;
+        }
   
 
 
@@ -314,7 +315,7 @@
 
 
          circlesUpdated
-         .attr('cx', (d, i) => (i * 120))
+         .attr('cx', (d, i) => (i * 140))
          .attr("cy", bHeight/2)
          .attr('r', d => sizeScale(d.rating))
          .attr('fill', d => colorScale(d.attribute));
@@ -322,7 +323,7 @@
 
          textUpdated
          .text(d => d.attribute.replace('_important', ''))
-         .attr('x', (d, i) => (i * 120))
+         .attr('x', (d, i) => (i * 140))
          .attr('y', bHeight/2 - 80)
          .attr('text-anchor', 'middle')
          .attr('font-size', '11px')
@@ -336,7 +337,7 @@
          circlesUpdated
          .enter()
          .append('circle')
-         .attr('cx', (d, i) => (i * 120))
+         .attr('cx', (d, i) => (i * 140))
          .attr("cy", bHeight/2)
          .attr('r', d => sizeScale(d.rating))
          .attr('fill', d => colorScale(d.attribute));
@@ -346,7 +347,7 @@
          .enter()
          .append('text')
          .text(d => d.attribute.replace('_important', ''))
-         .attr('x', (d, i) => (i * 120))
+         .attr('x', (d, i) => (i * 140))
          .attr('y', bHeight/2 - 80)
          .attr('text-anchor', 'middle')
          .attr('font-size', '11px')
@@ -442,16 +443,13 @@
           // don't need this but could
           myColor.domain(corr_extent)
 
-          let heatArea = heatmap.append("g").attr("class", "heatarea")
-            .attr("transform", `translate(${margin.left}, 0)`)
 
           const rects = heatArea.selectAll("rect.heat").data(corr_like) 
           const text = heatArea.selectAll("text.heat").data(corr_like)
 
-          //rects.exit().remove();
-
           rects.exit().remove();
           text.exit().remove();
+
           
           rects.join("rect")
             .attr("class", "heat")
@@ -460,13 +458,13 @@
             .attr("width", x.bandwidth())
             .attr("height", y.bandwidth())
             .style("fill", d => myColor(d.correlation))
-  
 
 
           text.join("text").attr("class", "heat")
               .attr("x", d => x(d.column_y) + 40)
               .attr("y", y.bandwidth()/2 + 5)
               .text(d => d.correlation.toFixed(2))
+
 
 
           var sorted =  corr_like.sort((a,b) => d3.descending(a.correlation, b.correlation))
