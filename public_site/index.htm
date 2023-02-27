@@ -121,7 +121,7 @@
       </div>
       <div class="fill">
       <h2><i>THINK</i> that the most important attribute in a partner is</h2>
-      <h2 id="top"></h2>
+      <h2 class="top"></h2>
     </div>
       
       
@@ -206,16 +206,14 @@
 
 
        if (filters.length === 0) {
-        console.log("array empty")
-    
-    circles.selectAll('circle').remove();
-    circles.selectAll('text').remove();
-    heatArea.selectAll("rect.heat").remove();
-    return;
-
-    // if(filters.length === 0){console.log("array empty")}
-  }
-  else if (filters.length >= 1){updateTopRated(topRating, filters)}
+        console.log(filters.length)
+        inputTop.style("visibility", "hidden")
+        circles.selectAll('circle').remove();
+        circles.selectAll('text').remove();
+        heatmap.selectAll('.heat').style("display", "none")
+        return;
+      }
+  
 
 
     //   console.log(filters)
@@ -297,35 +295,26 @@
    
         // const inputTop = d3.select("h2#top");
 
-        let rating_sorted = filteredAttributes.sort((a, b) => a.rating - b.rating);
+        var rating_sorted = filteredAttributes.sort((a, b) => a.rating - b.rating);
 
-        const highestRating = rating_sorted[rating_sorted.length - 1].rating; 
+        var highestRating = []
+        
 
-        // inputTop.data(rating_sorted)
-        //   .text(`${rating_sorted[rating_sorted.length - 1].attribute.replace("_important", "")}`)
-        //   .style("font-weight", "bold");
+        highestRating.push(rating_sorted[rating_sorted.length - 1])
 
-        console.log(rating_sorted)
 
-       if (rating_sorted.length === 6){var topRating = rating_sorted[rating_sorted.length - 1].attribute.replace("_important", "")}
-
-       console.log(topRating)
-
-        // if(filters.length === 0){console.log("array empty")}
-        console.log(filters)
-
+        if(highestRating.length >= 1){
+          var topRating = highestRating[0].attribute.replace("_important", "")}
+        
+      
         updateTopRated(topRating, filters)
+      })
 
-        // updateTopRated(topRating, filters)
-          //inputCorr.data(sorted).text(d => d.column_y.replace("_partner", "")).style("font-weight", "bold")
-         })
-
-        const inputTop = d3.select("h2#top");
+        const inputTop = d3.select("h2.top");
 
         function updateTopRated(topRating, filters){
-            console.log(filters.length)
-            inputTop.text(topRating).style("font-weight", "bold")
-        }
+            inputTop.text(topRating).attr("class", "toptext").style("font-weight", "bold").style("visibility", "visible")}
+        
  
 
 
@@ -364,15 +353,15 @@
           .range(["white", "red"])
           .domain([0, 1])
 
-        let heatArea = heatmap.append("g")
+        const heatArea = heatmap.append("g")
           .attr("transform", `translate(${margin.left}, 0)`)
 
         let corr = jz.arr.correlationMatrix(data, attribs)
 
         let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
 
-        const rects = heatArea.selectAll("rect.heat").data(corr_like)
-        const text = heatArea.selectAll("text.heat").data(corr_like)
+        // const rects = heatArea.selectAll("rect.heat").data(corr_like)
+        // const text = heatArea.selectAll("text.heat").data(corr_like)
 
         // // default??
         // rects.enter().append("rect")
@@ -391,6 +380,7 @@
         // const inputCorr = d3.select("h2.corr").data(sorted);
 
         function updateHeat(filters){
+          
 
           leftG.call(d3.axisLeft(y));
           bottomG.call(d3.axisBottom(x))
@@ -413,63 +403,40 @@
           const rects = heatArea.selectAll("rect.heat").data(corr_like) 
           const text = heatArea.selectAll("text.heat").data(corr_like)
 
+          //rects.exit().remove();
+
           rects.exit().remove();
+          text.exit().remove();
           
-          rects.enter().append("rect")
+          rects.join("rect")
             .attr("class", "heat")
             .attr("x", d => x(d.column_y))
             .attr("y", y("like"))
             .attr("width", x.bandwidth())
             .attr("height", y.bandwidth())
-            .style("fill", d => myColor(d.correlation))  
+            .style("fill", d => myColor(d.correlation))
+  
 
 
-          text.exit().remove();
-
-          text.enter().append("text").attr("class", "heat")
+          text.join("text").attr("class", "heat")
               .attr("x", d => x(d.column_y) + 40)
               .attr("y", y.bandwidth()/2 + 5)
               .text(d => d.correlation.toFixed(2))
 
-              
 
-          let sorted =  corr_like.sort((a,b) => d3.descending(a.correlation, b.correlation))
+          var sorted =  corr_like.sort((a,b) => d3.descending(a.correlation, b.correlation))
 
           console.log(sorted[0])
 
           if(filters.length >= 1){
             var topCorrelation = sorted[0].column_y.replace("_partner", "")
 
-            // console.log(topCorrelation)
           }
           updateTopCorr(topCorrelation);
 
-          //  console.log(topCorrelation)
+          
 
-            // inputCorr.data(sorted).text(d => d.column_y.replace("_partner", "")).style("font-weight", "bold")
-
-            // const inputCorr = d3.select("h2.corr");
-
-            // if(topCorrelation){
-            //   if(filters.length >= 1){
-            //   console.log(topCorrelation)
-            //   inputCorr.data(sorted).text(topCorrelation).style("font-weight", "bold")}
-            //   return;
-
-            // }
-
-            // function updateTopCorr(topCorrelation){
-            //   inputCorr.data(sorted).text(topCorrelation).style("font-weight", "bold")}
-            // }
-            
-
-            //inputCorr.selectAll('text').remove()
-
-
-
-            
-
-              // need to add legend!!
+            // need to add legend!!
         }
 
         const inputDiv = d3.selectAll("h2.fill");
