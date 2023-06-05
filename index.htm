@@ -1,0 +1,510 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+
+    <title>Speed Dating</title>
+
+    <style>
+      body {
+        margin: 1in;
+        font-family: 'Courier New', Courier, monospace;
+        background-color: #FFEAFD;
+        /* line-height: 0.5cm; */
+      }
+
+      h1 {
+        font-family: 'Courier New', Courier, monospace;
+        font-style: italic;
+        color: rgb(94, 8, 72);
+      }
+
+      h2 {
+        font-size: 16;
+        font-weight: normal;
+      }
+
+
+      h3 {
+        font-family: 'Courier New', Courier, monospace;
+        font-style: italic;
+        color: rgb(94, 8, 72);
+      }
+
+      .gridlines .domain {
+        display: "none";
+      }
+
+      div.child {
+        margin-left: 1em;
+        padding-top: 1em;
+        padding-left: 1em;
+      }
+
+      div#full{
+        width: 1250px;
+      }
+
+      div.title {
+        width: 100%;
+      }
+
+      div.title p {
+        margin-left: 1em;
+      }
+
+      #htext{
+        padding-left: 1em;
+        margin-left: 1em;
+        background-color: white;
+        border: solid plum;
+        border-radius: 2%;
+      }
+
+
+      div#filters {
+        border: solid plum;
+        background-color:white;
+        border-radius: 2%;
+        margin-top: 1em;
+      }
+
+
+      div#filters label{
+        display: flex;
+        padding: 0.5em;
+        gap: 0.5em;
+        font-weight: none;
+      }
+
+      div#container {
+        display: flex;
+        align-items: stretch;
+      }
+
+      div.fill h2{
+        display: inline-block;
+      }
+
+      .text-graph {
+        border: solid plum;
+        background-color:white;
+        border-radius: 2%;
+        padding: 1em;
+        width: 900px;
+      }
+
+      .tip {
+        color:darkmagenta;
+        margin: 0em;
+        font-size: small;
+      }
+
+      .axis {
+        font-family: 'Courier New', Courier, monospace;
+
+      }
+
+      svg {
+        margin-top: 1em;
+      }
+
+       
+    </style>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/jeezy@1.13.1/lib/jeezy.js"></script>
+    <script src="https://unpkg.com/jeezy@1.13.1/lib/jeezy.min.js"></script>
+
+  </head>
+  <body>
+    <h1>Homework 2</h1>
+    <h2>Sydney Bednar (sb844), Victoria Eshun (vee4), Noorejehan Umar (nu44)</h2>
+
+    <div id="full">
+    <div class="title">
+      <div id="htext"><h1>Speed Dating</h1></div>
+    
+    <p>Do we have a good perception of what we desire in a partner? In these charts, we explore differences in what people say they
+      prefer in a partner versus what actually led them to like their partner during a speed dating event. We examine 6 key attributes: 
+      attractiveness, sincerity, intelligence, humor, ambition, and the presence of shared interests.
+    </p>
+    </div>
+
+    <div id="container">
+      <div id="filters" class="child">
+        <p class="tip">**Select a filter to begin.**</p>
+        <div id="gender">
+          <h3>Gender</h3>
+          <label>
+            <input type="checkbox" id="female">Female</input>
+          </label>
+          
+          <label>
+            <input type="checkbox" id="male">Male</input>
+          </label>
+          
+        </div>
+        <div id="race">
+          <h3>Race</h3>
+          <label>
+            <input type="checkbox" id="European">European/Caucasian-American</input>
+          </label>
+        
+          <label>
+            <input type="checkbox" id="Asian">Asian/Pacific Islander/Asian-American </input>
+          </label>
+          
+          <label>
+            <input type="checkbox" id="Latino">Latino/Hispanic American</input>
+          </label>
+          
+          <label>
+            <input type="checkbox" id="Black">Black/African American</input>
+          </label>
+        
+          <label>
+            <input type="checkbox" id="Other">Other</input>
+          </label>
+          
+        </div>
+      </div>
+      <div id="charts" class="child">
+        <h1 style="margin-top: 0em">What do people THINK they prefer in a partner?</h1>
+        <div class="text-graph">
+        
+          <div id="think-input" class="fill">
+            <h2>This bubble chart shows that people who are </h2>
+            <h2 class="fill"></h2>
+          </div>
+          <div class="fill">
+            <h2><i>THINK</i> that the most important attribute in a partner is </h2>
+            <h2 class="top"></h2>
+          </div>
+        
+          <svg id="bubble" width="1000" , height="200"></svg>
+        </div>
+
+        <h1>What do people ACTUALLY prefer in a partner?</h1>
+        <div class="text-graph">
+        
+          <div id="actual-input" class="fill">
+            <h2>This correlation heatmap shows that people who are</h2>
+            <h2 class="fill"></h2>
+            
+          </div>
+
+          <div class="fill">
+            <h2><i>ACTUALLY</i> like a partner because of the attribute</h2>
+            <h2 class="corr"></h2>
+          </div>
+        
+        
+      
+          <svg id="heatmap" width="800" , height="200"></svg>
+
+        </div>
+      </div>
+    </div>
+    
+    </div>
+    <script>
+      const bubble = d3.select("svg#bubble")
+      const bWidth = bubble.attr("width")
+      const bHeight = bubble.attr("height")
+      const margin = { top: 10, right: 10, bottom: 40, left: 50 };
+      const circles = bubble.append("g").attr("id", "circles").attr('transform', 'translate(100,0)');
+      const femaleButton = d3.select("#female")
+      const maleButton = d3.select("#male")
+      const whiteButton = d3.select("#European")
+      const asianButton = d3.select("#Asian")
+      const latinoButton = d3.select("#Latino")
+      const blackButton = d3.select("#Black")
+      const otherButton = d3.select("#Other")
+
+      const bubWidth = bWidth - margin.left - margin.right;
+      const bubHeight = bHeight - margin.top - margin.bottom;
+
+      const requestData = async () => {
+        let data = await d3.csv('clean_speeddating.csv', d3.autoType)
+        
+     
+
+        // bubble plot work here
+
+        d3.selectAll("input").on("change", function updateChart()  {
+      
+          d3.select(this).style("font-weight", "bold")
+
+          // initialize filter array
+          var filters = []
+
+          if(d3.select("#female").property("checked")){
+            filters.push("female")
+          }
+          if(d3.select("#male").property("checked")){
+            filters.push("male")
+          }
+          if(d3.select("#European").property("checked")){
+            filters.push("European")
+          }
+          if(d3.select("#Asian").property("checked")){
+            filters.push("Asian")
+          }
+          if(d3.select("#Latino").property("checked")){
+            filters.push("Latino")
+          }
+          if(d3.select("#Black").property("checked")){
+            filters.push("Black")
+          }
+          if(d3.select("#Other").property("checked")){
+            filters.push("Other")
+          }
+
+          updateHeat(filters); 
+          updateText(filters);
+
+
+          if (filters.length === 0) {
+            console.log(filters.length)
+            inputTop.style("visibility", "hidden")
+            circles.selectAll('circle').remove();
+            circles.selectAll('text').remove();
+            heatmap.selectAll('rect').remove();
+            heatmap.selectAll('text.heat').remove();
+            heatmap.selectAll('g.axis').style("visibility", "hidden");
+            return;
+          }
+    
+
+          // filter dataset according to selected filters
+          var selectedValue = data.filter(d=> filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
+          const attributeNames = Object.keys(selectedValue[0]).filter(d => d !== "gender" || d !=="race");
+          const attributeData = attributeNames.map(attribute => {
+            const ratings = selectedValue.map(d => +d[attribute]);
+            const averageRating = d3.mean(ratings);
+            return { attribute, rating: averageRating };
+          });
+
+          const filteredAttributes= attributeData.filter(obj => obj.attribute.includes("important"));
+        
+          // scales for bubble chart
+          const ratingExtent = d3.extent(filteredAttributes, d => d.rating)
+          const sizeScale = d3.scaleSqrt().domain(ratingExtent).range([10, 70]);
+          const colorScale = d3.scaleOrdinal().range(["#7E0080", "#9B51B4", "#DF6FA0", 
+          "#EF224B", "#C20232", "#6E0E0A"]);
+
+
+          // initialize and update circles and corresponding text 
+          const circlesUpdated = circles.selectAll('circle').data(filteredAttributes);
+          const textUpdated = circles.selectAll('text').data(filteredAttributes);
+
+
+          circlesUpdated
+          .attr('cx', (d, i) => (i * 140))
+          .attr("cy", bHeight/2)
+          .attr('r', d => sizeScale(d.rating))
+          .attr('fill', d => colorScale(d.attribute));
+
+
+          textUpdated
+          .text(d => d.attribute.replace('_important', ''))
+          .attr('x', (d, i) => (i * 140))
+          .attr('y', bHeight/2 - 80)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '11px')
+          .attr('fill', 'black');
+
+
+          circlesUpdated.exit().remove();
+          textUpdated.exit().remove();
+
+
+          circlesUpdated
+          .enter()
+          .append('circle')
+          .attr('cx', (d, i) => (i * 140))
+          .attr("cy", bHeight/2)
+          .attr('r', d => sizeScale(d.rating))
+          .attr('fill', d => colorScale(d.attribute));
+
+
+          textUpdated
+          .enter()
+          .append('text')
+          .text(d => d.attribute.replace('_important', ''))
+          .attr('x', (d, i) => (i * 140))
+          .attr('y', bHeight/2 - 80)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '11px')
+          .attr('fill', 'black');
+
+
+          // rank attributes according to ratings and take out attribute with highest rating 
+          var rating_sorted = filteredAttributes.sort((a, b) => a.rating - b.rating);
+
+          var highestRating = []
+          
+          highestRating.push(rating_sorted[rating_sorted.length - 1])
+
+          if(highestRating.length >= 1){
+            var topRating = highestRating[0].attribute.replace("_important", "")
+          }
+          
+          updateTopRated(topRating, filters)
+        })
+
+        const inputTop = d3.select("h2.top");
+
+        // function to dynamically change text according to highest rated attribute
+        function updateTopRated(topRating, filters){
+            inputTop.text(topRating).attr("class", "toptext").style("font-weight", "bold").style("visibility", "visible")
+        }
+        
+ 
+
+        // heatmaps work here
+        const heatmap = d3.select("svg#heatmap")
+        const width = heatmap.attr("width") - margin.left - margin.right
+        const height = heatmap.attr("height") - margin.top - margin.bottom
+
+        const attribs = ["attractive_partner", "sincere_partner", "intelligence_partner",
+          "funny_partner", "ambition_partner", "shared_interests_partner", "like"]
+
+        const noLike = ["attractive_partner", "sincere_partner", "intelligence_partner", 
+        "funny_partner", "ambition_partner", "shared_interests_partner"]
+
+        // initializing heatmap axes      
+        var x = d3.scaleBand()
+          .range([0, width])
+          .domain(noLike)
+          .padding(0.01);
+
+        const bottomG = heatmap.append("g").attr("class", "axis")
+          .attr("transform", `translate(${margin.left}, ${height})`)
+
+        var y = d3.scaleBand()
+          .range([height, 0])
+          .domain(["like"])
+          .padding(0.01);
+
+        const leftG = heatmap.append("g").attr("class", "axis")
+          .attr("transform", `translate(${margin.left}, 0)`)
+          
+
+        var myColor = d3.scaleLinear()
+          .range(["white", "red"])
+          .domain([0, 1])
+
+        // initializing heatmap andd correlation matrix
+        const heatArea = heatmap.append("g").attr("class", "heatarea")
+          .attr("transform", `translate(${margin.left}, 0)`)
+
+        let corr = jz.arr.correlationMatrix(data, attribs)
+
+        let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
+
+        const botAxis = d3.axisBottom()
+
+
+        function updateHeat(filters){
+
+          // make axes visible
+          heatmap.selectAll('g.axis').style("visibility", "visible");
+          
+        
+          leftG.call(d3.axisLeft(y));
+          bottomG.call(botAxis.scale(x).tickFormat(d => d.replace("_partner", "")))
+
+          // create array with correlation data for heatmap
+
+          let corr_data = data.filter(d => filters.includes(d.gender) || filters.includes(d.race) || (filters.includes(d.gender) && filters.includes(d.race)));
+      
+          let corr = jz.arr.correlationMatrix(corr_data, attribs)
+
+          let corr_like = corr.filter(d => d.column_x === "like" && d.column_y != "like")
+
+          let corr_extent = d3.extent(corr_like, d => d.correlation)
+          
+          myColor.domain(corr_extent)
+
+
+          // creating heatmap rectangles and text 
+          const rects = heatArea.selectAll("rect.heat").data(corr_like) 
+          const text = heatArea.selectAll("text.heat").data(corr_like)
+
+          rects.exit().remove();
+          text.exit().remove();
+
+          
+          rects.join("rect")
+            .attr("class", "heat")
+            .attr("x", d => x(d.column_y))
+            .attr("y", y("like"))
+            .attr("width", x.bandwidth())
+            .attr("height", y.bandwidth())
+            .style("fill", d => myColor(d.correlation))
+
+
+          text.join("text").attr("class", "heat")
+              .attr("x", d => x(d.column_y) + 40)
+              .attr("y", y.bandwidth()/2 + 5)
+              .text(d => d.correlation.toFixed(2))
+
+
+
+          // getting attribute with highest correlation 
+          var sorted =  corr_like.sort((a,b) => d3.descending(a.correlation, b.correlation))
+
+          console.log(sorted[0])
+
+          if(filters.length >= 1){
+            var topCorrelation = sorted[0].column_y.replace("_partner", "")
+
+          }
+          updateTopCorr(topCorrelation);
+
+        }
+
+        const inputDiv = d3.selectAll("h2.fill");
+
+        // adding dynamically changing text based on filters
+        function updateText(filters){
+
+          text = ""
+
+          filters.forEach((f,i) => {
+
+            let f_update= f.charAt(0).toUpperCase() + f.slice(1)
+
+            if(i==filters.length-1){
+              text = text + f_update
+            }
+            else{
+              text = text + f_update + ", "
+            }
+            
+          })
+
+          console.log(text)
+
+          inputDiv.text(text)
+                  .attr("class","select")
+                  .style("font-weight", "bold");
+
+        }
+
+        const inputCorr = d3.select("h2.corr");
+
+        function updateTopCorr(topCorrelation){
+            inputCorr.text(topCorrelation).style("font-weight", "bold")
+        }
+
+  
+
+      }
+      requestData();
+
+    </script>
+   
+  </body>
+</html>
